@@ -55,15 +55,15 @@ describe "The base sandbox app" do
     end
   end
   
-  it 'will service resource requests if and only if they are made to a ResourceInterface implementor' do
-    # Load a class that is not intended to service requests and try to request it
-    require_relative 'AutoloaderTestFiles/A/AClass'
-    
+  it 'will service resource requests if and only if they are made to a ResourceInterface implementor (excluding ResourceImplementor itself)' do
+    uris = ['/Autoloader', '/Autoloader/', '/Autoloader/5', '/HiddenResourceExample', '/HiddenResourceExample/', '/HiddenResourceExample/5', '/ResourceImplementor', '/ResourceImplementor/', '/ResourceImplementor/5']
     methods.each do |method|
-      self.send(method, '/AClass')
-      last_response.body.must_equal process_request(lambda {
-        raise ResourceInvalidError.new()
-      })
+      uris.each do |uri|
+        self.send(method, uri)
+        last_response.body.must_equal process_request(lambda {
+          raise ResourceInvalidError.new()
+        })
+      end
     end
   end
   
