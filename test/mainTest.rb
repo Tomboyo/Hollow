@@ -15,6 +15,8 @@ end
 methods = [:get, :post, :put, :patch, :delete, :options]
 resources = [ResourceExample]
 
+# Note that all process_request calls default to debug=false, which changes output for internal errors.
+
 describe "The base sandbox app" do
   it 'will respond with regularly-formatted JSON to all requests' do
     methods.each do |method|
@@ -50,6 +52,18 @@ describe "The base sandbox app" do
 
 
       # Add other routes as necessary
+    end
+  end
+  
+  it 'will service resource requests if and only if they are made to a ResourceInterface implementor' do
+    # Load a class that is not intended to service requests and try to request it
+    require_relative 'AutoloaderTestFiles/A/AClass'
+    
+    methods.each do |method|
+      self.send(method, '/AClass')
+      last_response.body.must_equal process_request(lambda {
+        raise ResourceInvalidError.new()
+      })
     end
   end
   
