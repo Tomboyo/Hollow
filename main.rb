@@ -6,7 +6,7 @@ require_relative('lib/Autoloader')
 
 register Sinatra::MultiRoute
 
-debug = false
+debug = true
 autoloader = Autoloader.new(File::expand_path('..', __FILE__))
 autoloader.require_files_in('lib')
 autoloader.require_files_in('resource')
@@ -16,21 +16,19 @@ include Helper
 # Requests to Resource classes
 route :get, :post, :put, :patch, :delete, :options, '/:resource/?:id?' do |res, id|
   process_request(lambda {
-    raise ResourceMethodInvalidError.new unless Object.const_defined?(res)
+    # If the class isn't required already, it isn't a resource.
+    raise ResourceInvalidError.new unless Object.const_defined?(res)
     
     method = request.request_method.downcase.to_sym
-    resource = nil
-    
-    if id.nil?
-      # Reference to Class
-      resource = Object.const_get(res)
-      raise ResourceInvalidError.new unless resource.include? ResourceInterface
-    else
-      # Reference to instance of class
-      resource = Object.const_get(res).new(id.to_i)
-      raise ResourceInvalidError.new unless resource.class.include? ResourceInterface
-    end
 
+    resource = Object.const_get(res)
+    raise ResourceInvalidError.new unless resource < ResourceInterface && resource.class != ResourceInterface
+    
+    unless id.nil?
+      # Reference to instance of class
+      resource = resource.new(id.to_i)
+    end
+    
     return {'data' => resource.public_send(method)}
   }, debug)
 end

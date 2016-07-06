@@ -1,7 +1,6 @@
 require_relative 'ResourceInterface'
 
-class ResourceExample
-  include ResourceInterface
+class ResourceExample < ResourceInterface
   
   def self.get
     return "ResourceExample::GET"
