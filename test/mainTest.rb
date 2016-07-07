@@ -2,8 +2,11 @@ ENV['RACK_ENV'] = 'test'
 require 'minitest/autorun'
 require 'rack/test'
 require_relative '../lib/Helper'
-require File.expand_path('../../main.rb', __FILE__)
-require File.expand_path('../../resource/ResourceExample.rb', __FILE__)
+require_relative '../main'
+require_relative '../resource/ResourceExample'
+require_relative '../resource/HiddenResourceExample'
+require_relative '../resource/InstanceResourceExample'
+require_relative '../resource/StaticResourceExample'
 
 include Rack::Test::Methods
 include Helper
@@ -15,93 +18,27 @@ end
 methods = [:get, :post, :put, :patch, :delete, :options]
 resources = [ResourceExample]
 
-# Note that all process_request calls default to debug=false, which changes output for internal errors.
+# Note that all process_request calls default to debug=false, which changes
+# output for internal errors.
 
 describe "The base sandbox app" do
-  it 'will respond with regularly-formatted JSON to all requests' do
-    methods.each do |method|
-      self.send(method, '/')
-      response = JSON.parse(last_response.body)
-      (response.include?('error') || response.include?('data')).must_equal true
-      
-      # The following are invalid requests
-      self.send(method, '/NotAResource')
-      response = JSON.parse(last_response.body)
-      (response.include?('error') || response.include?('data')).must_equal true
-      
-      self.send(method, '/NotAResource/')
-      response = JSON.parse(last_response.body)
-      (response.include?('error') || response.include?('data')).must_equal true
-      
-      self.send(method, '/NotAResource/5')
-      response = JSON.parse(last_response.body)
-      (response.include?('error') || response.include?('data')).must_equal true
-              
-      # The following are valid requests
-      self.send(method, '/ResourceExample')
-      response = JSON.parse(last_response.body)
-      (response.include?('error') || response.include?('data')).must_equal true
-        
-      self.send(method, '/ResourceExample/')
-      response = JSON.parse(last_response.body)
-      (response.include?('error') || response.include?('data')).must_equal true
-        
-      self.send(method, '/ResourceExample/1')
-      response = JSON.parse(last_response.body)
-      (response.include?('error') || response.include?('data')).must_equal true
 
+  #
+  # Reusable test procs
+  #
 
-      # Add other routes as necessary
-    end
-  end
-  
-  it 'will service resource requests if and only if they are made to a ResourceInterface implementor (excluding ResourceImplementor itself)' do
-    uris = ['/Autoloader', '/Autoloader/', '/Autoloader/5', '/HiddenResourceExample', '/HiddenResourceExample/', '/HiddenResourceExample/5', '/ResourceImplementor', '/ResourceImplementor/', '/ResourceImplementor/5']
+  invalid_resource_proc = proc do |methods, routes|
     methods.each do |method|
-      uris.each do |uri|
-        self.send(method, uri)
+      routes.each do |route|
+        self.send(method, route)
         last_response.body.must_equal process_request(lambda {
           raise ResourceInvalidError.new()
         })
       end
     end
   end
-  
-  it "will respond with an error message when a requested resource is invalid" do    
-    methods.each do |method|
-      self.send(method, '/NotAResource')
-      response = JSON.parse(last_response.body)
-      response.must_include 'error'
-      
-      self.send(method, '/NotAResource/')
-      response = JSON.parse(last_response.body)
-      response.must_include 'error'
-        
-      self.send(method, '/NotAResource/1')
-      response = JSON.parse(last_response.body)
-      response.must_include 'error'
-    end
-  end
-  
-  it "will invoke class methods of valid resources if no ID is provided" do
-    methods.each do |method|
-      resources.each do |resource|
-        self.send(method, "/#{resource}")
-        response = last_response.body
-        response.must_equal process_request(lambda {
-          return {'data' => resource.public_send(method)}
-        })
-        
-        self.send(method, "/#{resource}/")
-        response = last_response.body
-        response.must_equal process_request(lambda {
-          return {'data' => resource.public_send(method)}
-        })
-      end
-    end
-  end
-  
-  it "will invoke instance methods of valid resources if an ID is specified" do
+
+  resource_instance_proc = proc do |methods, resources|
     methods.each do |method|
       resources.each do |resource|
         10.times do
@@ -114,5 +51,80 @@ describe "The base sandbox app" do
         end
       end
     end
+  end
+
+  resource_static_proc = proc do |methods, resources|
+    methods.each do |method|
+      resources.each do |resource|
+        self.send(method, "/#{resource}")
+        last_response.body.must_equal process_request(lambda {
+          return {'data' => resource.public_send(method)}
+        })
+
+        self.send(method, "/#{resource}/")
+        last_response.body.must_equal process_request(lambda {
+          return {'data' => resource.public_send(method)}
+        })
+      end
+    end
+  end
+
+  response_include_proc = proc do |methods, routes, includables|
+    methods.each do |method|
+      routes.each do |route|
+        self.send(method, route)
+        response = JSON.parse(last_response.body)
+        includables.any? { |k| response.include? k }.must_equal true
+      end
+    end
+  end
+
+  it 'will respond with regularly-formatted JSON to all requests' do
+    # verify one of three keys is set on the response
+    response_include_proc.call(
+      methods,
+      %w[
+        / /NotAResource /NotAResource/ NotAResource/5 /ResourceExample
+        ResourceExample/ ResourceExample/5
+      ],
+      %w[data error internal_error]
+    )
+
+    # verify the internal_error flag is set when appropriate
+    process_request(lambda { Object.NOPE }).must_include 'internal_error'
+  end
+
+  it "will respond with an error message to invalid resource requests" do
+    response_include_proc.call(
+      methods,
+      %w[/NotAResource /NotAResource/ /NotAResource/5],
+      %w[error]
+    )
+  end
+
+  it 'will deny requests to non-ResourceInterfaces' do
+    # Note that these are real classes being requested!
+    invalid_resource_proc.call(methods, %w[
+      /Autoloader /Autoloader/ /Autoloader/5 /HiddenResourceExample
+      /HiddenResourceExample/ /HiddenResourceExample/5
+    ])
+  end
+
+  it 'will discriminate between instance/static access of resources' do
+    # instance only
+    invalid_resource_proc.call(methods, %w[
+      /InstanceResourceExample /InstanceResourceExample/
+    ])
+
+    # static only
+    invalid_resource_proc.call(methods, %w[/StaticResourceExample/5])
+  end
+
+  it "will invoke class methods of valid resources if no ID is provided" do
+    resource_static_proc.call(methods, [StaticResourceExample, ResourceExample])
+  end
+
+  it "will invoke instance methods of valid resources if an ID is specified" do
+    resource_instance_proc.call(methods, [InstanceResourceExample, ResourceExample])
   end
 end
