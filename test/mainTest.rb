@@ -1,30 +1,9 @@
-ENV['RACK_ENV'] = 'test'
-require 'minitest/autorun'
-require 'rack/test'
-require_relative '../lib/Helper'
-require_relative '../main'
-require_relative '../resource/ResourceExample'
-require_relative '../resource/HiddenResourceExample'
-require_relative '../resource/InstanceResourceExample'
-require_relative '../resource/StaticResourceExample'
-
-include Rack::Test::Methods
-include Helper
-
-def app
-  Sinatra::Application
-end
-
-methods = [:get, :post, :put, :patch, :delete, :options]
-resources = [ResourceExample]
-
-# Note that all process_request calls default to debug=false, which changes
-# output for internal errors.
+require_relative 'test_helper'
 
 describe "The base sandbox app" do
 
   #
-  # Reusable test procs
+  # Reusables
   #
 
   invalid_resource_proc = proc do |methods, routes|
@@ -34,6 +13,16 @@ describe "The base sandbox app" do
         last_response.body.must_equal process_request(lambda {
           raise ResourceInvalidError.new()
         })
+      end
+    end
+  end
+
+  response_include_proc = proc do |methods, routes, includables|
+    methods.each do |method|
+      routes.each do |route|
+        self.send(method, route)
+        response = JSON.parse(last_response.body)
+        includables.any? { |k| response.include? k }.must_equal true
       end
     end
   end
@@ -69,62 +58,60 @@ describe "The base sandbox app" do
     end
   end
 
-  response_include_proc = proc do |methods, routes, includables|
-    methods.each do |method|
-      routes.each do |route|
-        self.send(method, route)
-        response = JSON.parse(last_response.body)
-        includables.any? { |k| response.include? k }.must_equal true
-      end
-    end
-  end
-
   it 'will respond with regularly-formatted JSON to all requests' do
     # verify one of three keys is set on the response
     response_include_proc.call(
-      methods,
+      $settings.resource_methods,
       %w[
-        / /NotAResource /NotAResource/ NotAResource/5 /ResourceExample
-        ResourceExample/ ResourceExample/5
+        / /NotAResource /NotAResource/ NotAResource/5 StaticAndInstanceAccess
+        StaticAndInstanceAccess/ StaticAndInstanceAccess/5
       ],
       %w[data error internal_error]
     )
 
     # verify the internal_error flag is set when appropriate
-    process_request(lambda { Object.NOPE }).must_include 'internal_error'
+    # System warnings from this call are suppressed with the 'true' arguemnts
+    process_request(lambda { Object.NOPE }, true).must_include 'internal_error'
   end
 
   it "will respond with an error message to invalid resource requests" do
+    # Not real classes
     response_include_proc.call(
-      methods,
+      $settings.resource_methods,
       %w[/NotAResource /NotAResource/ /NotAResource/5],
       %w[error]
     )
-  end
 
-  it 'will deny requests to non-ResourceInterfaces' do
-    # Note that these are real classes being requested!
-    invalid_resource_proc.call(methods, %w[
-      /Autoloader /Autoloader/ /Autoloader/5 /HiddenResourceExample
-      /HiddenResourceExample/ /HiddenResourceExample/5
+    # Not ResourceInterfaces, but real classes
+    invalid_resource_proc.call($settings.resource_methods, %w[
+      /NoAccess /NoAccess/ /NoAccess/5 /Helper
+      /Helper/ /Helper/5
     ])
   end
 
   it 'will discriminate between instance/static access of resources' do
     # instance only
-    invalid_resource_proc.call(methods, %w[
-      /InstanceResourceExample /InstanceResourceExample/
+    invalid_resource_proc.call($settings.resource_methods, %w[
+      /InstanceAccessOnly /InstanceAccessOnly/
     ])
 
     # static only
-    invalid_resource_proc.call(methods, %w[/StaticResourceExample/5])
+    invalid_resource_proc.call($settings.resource_methods, %w[
+      /StaticAccessOnly/5
+    ])
   end
 
   it "will invoke class methods of valid resources if no ID is provided" do
-    resource_static_proc.call(methods, [StaticResourceExample, ResourceExample])
+    resource_static_proc.call(
+      $settings.resource_methods,
+      [StaticAccessOnly, StaticAndInstanceAccess]
+    )
   end
 
   it "will invoke instance methods of valid resources if an ID is specified" do
-    resource_instance_proc.call(methods, [InstanceResourceExample, ResourceExample])
+    resource_instance_proc.call(
+      $settings.resource_methods,
+      [InstanceAccessOnly, StaticAndInstanceAccess]
+    )
   end
 end

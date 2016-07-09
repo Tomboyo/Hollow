@@ -1,6 +1,4 @@
-require_relative 'ResourceInterface'
-
-class ResourceExample
+class StaticAndInstanceAccess
   include ResourceInterface # /resource/id requests allowed
   extend ResourceInterface  # /resource requests allowed
 
@@ -9,7 +7,7 @@ class ResourceExample
   end
 
   def self.get
-    return "ResourceExample::GET"
+    return "::GET"
   end
 
   def get

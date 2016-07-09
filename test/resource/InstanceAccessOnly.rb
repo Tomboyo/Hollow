@@ -1,7 +1,5 @@
-require_relative 'ResourceInterface'
-
 # This resource can only be accessed as an instance (with a valid record id)
-class InstanceResourceExample
+class InstanceAccessOnly
   include ResourceInterface
 
   def initialize id

@@ -5,7 +5,7 @@ module Helper
   # error.message extracted from an ApplicationError. In the event of a
   # non-ApplicationError, a message may be sent to the client provided debug has
   # been set to true.
-  def process_request(f, debug=false)
+  def process_request(f, suppress_warnings=false)
     return JSON.generate(f.call())
   rescue ResourceMethodInvalidError => error
     return JSON.generate({ error: 'The resource you requested can not respond to this request (see OPTIONS)' })
@@ -14,7 +14,7 @@ module Helper
   rescue ApplicationError => error
     return JSON.generate({ error: error.message })
   rescue => error
-    if debug
+    unless suppress_warnings
       warn "#{error}:"
       warn error.backtrace.join("\n")
     end
