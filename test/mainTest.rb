@@ -2,116 +2,98 @@ require_relative 'test_helper'
 
 describe "The base sandbox app" do
 
-  #
-  # Reusables
-  #
-
-  invalid_resource_proc = proc do |methods, routes|
-    methods.each do |method|
-      routes.each do |route|
-        self.send(method, route)
-        last_response.body.must_equal process_request(lambda {
-          raise ResourceInvalidError.new()
-        })
-      end
-    end
-  end
-
-  response_include_proc = proc do |methods, routes, includables|
-    methods.each do |method|
-      routes.each do |route|
-        self.send(method, route)
-        response = JSON.parse(last_response.body)
-        includables.any? { |k| response.include? k }.must_equal true
-      end
-    end
-  end
-
-  resource_instance_proc = proc do |methods, resources|
-    methods.each do |method|
-      resources.each do |resource|
-        10.times do
-          id = rand(100)
-          re = resource.new(id)
-          self.send(method, "/#{resource}/#{id}")
-          last_response.body.must_equal process_request(lambda {
-            return {'data' => re.public_send(method)}
-          })
-        end
-      end
-    end
-  end
-
-  resource_static_proc = proc do |methods, resources|
-    methods.each do |method|
-      resources.each do |resource|
-        self.send(method, "/#{resource}")
-        last_response.body.must_equal process_request(lambda {
-          return {'data' => resource.public_send(method)}
-        })
-
-        self.send(method, "/#{resource}/")
-        last_response.body.must_equal process_request(lambda {
-          return {'data' => resource.public_send(method)}
-        })
-      end
-    end
-  end
-
   it 'will respond with regularly-formatted JSON to all requests' do
-    # verify one of three keys is set on the response
-    response_include_proc.call(
-      $settings.resource_methods,
+    # verify expected requests set data or error keys
+    RequestGenerator.make_generic_requests(
       %w[
         / /NotAResource /NotAResource/ NotAResource/5 StaticAndInstanceAccess
         StaticAndInstanceAccess/ StaticAndInstanceAccess/5
-      ],
-      %w[data error internal_error]
-    )
+      ], {}
+    ) do |body, expected|
+      body = JSON.parse(body)
+      %w[data error].any? { |key| body.include? key}.
+        must_equal true
+    end
 
     # verify the internal_error flag is set when appropriate
-    # System warnings from this call are suppressed with the 'true' arguemnts
+    # System warnings from this call are suppressed with the 'true' arguemnt
     process_request(lambda { Object.NOPE }, true).must_include 'internal_error'
   end
 
   it "will respond with an error message to invalid resource requests" do
     # Not real classes
-    response_include_proc.call(
-      $settings.resource_methods,
-      %w[/NotAResource /NotAResource/ /NotAResource/5],
-      %w[error]
-    )
+    RequestGenerator.make_static_resource_requests(
+      ['NotAResource'], {}
+    ) do |body|
+      JSON.parse(body).must_include 'error'
+    end
+
+    RequestGenerator.make_instance_resource_requests(
+      ['NotAResource'], 1..10, {}
+    ) do |body|
+      JSON.parse(body).must_include 'error'
+    end
 
     # Not ResourceInterfaces, but real classes
-    invalid_resource_proc.call($settings.resource_methods, %w[
-      /NoAccess /NoAccess/ /NoAccess/5 /Helper
-      /Helper/ /Helper/5
-    ])
+    RequestGenerator.make_static_resource_requests(
+      [NoAccess, Helper], {}
+    ) do |body|
+      JSON.parse(body).must_include 'error'
+    end
+
+    RequestGenerator.make_instance_resource_requests(
+      [NoAccess, Helper], 1..10, {}
+    ) do |body|
+      JSON.parse(body).must_include 'error'
+    end
   end
 
   it 'will discriminate between instance/static access of resources' do
     # instance only
-    invalid_resource_proc.call($settings.resource_methods, %w[
-      /InstanceAccessOnly /InstanceAccessOnly/
-    ])
+    RequestGenerator.make_static_resource_requests(
+      [InstanceAccessOnly], {}
+    ) do |body, expected|
+      JSON.parse(body).must_include 'error'
+    end
 
     # static only
-    invalid_resource_proc.call($settings.resource_methods, %w[
-      /StaticAccessOnly/5
-    ])
+    RequestGenerator.make_instance_resource_requests(
+      [StaticAccessOnly], [1..10], {}
+    ) do |body, expected|
+      JSON.parse(body).must_include 'error'
+    end
   end
 
   it "will invoke class methods of valid resources if no ID is provided" do
-    resource_static_proc.call(
-      $settings.resource_methods,
-      [StaticAccessOnly, StaticAndInstanceAccess]
-    )
+    RequestGenerator.make_static_resource_requests(
+      [StaticAccessOnly, StaticAndInstanceAccess],
+      {
+        StaticAccessOnly => {get: 'data'},
+        StaticAndInstanceAccess => {get: 'data'}
+      }
+    ) do |body, expected|
+      JSON.parse(body).must_include String.try_convert(expected) || 'error'
+    end
   end
 
   it "will invoke instance methods of valid resources if an ID is specified" do
-    resource_instance_proc.call(
-      $settings.resource_methods,
-      [InstanceAccessOnly, StaticAndInstanceAccess]
-    )
+    # These requests should receive data payloads
+    RequestGenerator.make_instance_resource_requests(
+      [InstanceAccessOnly, StaticAndInstanceAccess],
+      1..10,
+      {
+        InstanceAccessOnly => {get: 'data'},
+        StaticAndInstanceAccess => {get: 'data'}
+      }
+    ) do |body, expected, resource, id, method|
+      body = JSON.parse(body)
+      if expected.nil?
+        body.must_include 'error'
+      else
+        body.must_include expected
+        resource = resource.new(id)
+        body[expected].must_equal resource.send(method)
+      end
+    end
   end
 end
