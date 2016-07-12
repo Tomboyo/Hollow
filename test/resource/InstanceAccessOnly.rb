@@ -6,7 +6,7 @@ class InstanceAccessOnly
     @id = id
   end
 
-  def get
+  def get(query = nil, data = nil)
     return @id
   end
 end

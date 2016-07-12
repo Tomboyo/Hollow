@@ -6,11 +6,11 @@ class StaticAndInstanceAccess
     @id = id
   end
 
-  def self.get
+  def self.get(query = nil, data = nil)
     return "::GET"
   end
 
-  def get
+  def get(query = nil, data = nil)
     return @id
   end
 end

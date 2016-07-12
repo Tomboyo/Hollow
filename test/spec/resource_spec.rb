@@ -1,6 +1,6 @@
 # Verify that the test case resources being used do not all just raise errors,
 # which would skew the results of mainTest.rb
-require_relative 'test_helper'
+require_relative '../test_helper'
 
 describe InstanceAccessOnly do
   it 'implements ResourceInterface non-statically only' do

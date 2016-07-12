@@ -50,7 +50,7 @@ class RequestGenerator
   def self.make_generic_requests(routes, mapping)
     routes.each do |route|
       $settings.resource_methods.each do |method|
-        Object.send(method, route)
+        self.send(method, route)
         yield last_response.body, (mapping.dig(route, method) ||
           mapping.dig(route))
       end

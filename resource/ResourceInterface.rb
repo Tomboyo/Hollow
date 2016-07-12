@@ -7,6 +7,6 @@
 # will prevent corresponding instance and static requests (/res/id, /res).
 module ResourceInterface
   $settings.resource_methods.each do |route|
-    define_method(route) { raise ResourceMethodInvalidError.new }
+    define_method(route) { |query, data| raise ResourceMethodInvalidException.new }
   end
 end

@@ -2,7 +2,7 @@
 class StaticAccessOnly
   extend ResourceInterface
 
-  def self.get
+  def self.get(query = nil, data = nil)
     return '::GET'
   end
 end

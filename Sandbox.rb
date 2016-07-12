@@ -30,25 +30,40 @@ class Sandbox < Sinatra::Base
   route *$settings.resource_methods, '/:resource/?:id?' do |res, id|
     process_request(lambda {
       # If the class isn't required already, it isn't a resource.
-      raise ResourceInvalidError.new unless Object.const_defined?(res) &&
+      raise ResourceInvalidException.new unless Object.const_defined?(res) &&
         Object.const_get(res).is_a?(Class)
 
       resource = Object.const_get(res)
 
       if id.nil?
         # verify that resource extends the interface
-        raise ResourceInvalidError.new unless resource.is_a?(ResourceInterface) &&
+        raise ResourceInvalidException.new unless resource.is_a?(ResourceInterface) &&
           resource.class != ResourceInterface
       else
         # verify that resource includes the interface
-        raise ResourceInvalidError.new unless resource.include? ResourceInterface
+        raise ResourceInvalidException.new unless resource.include? ResourceInterface
         resource = resource.new(id.to_i)
       end
 
-      # Method names are implicitly sanitized by the route parameters, so we contain
+      # Get the query string and request body parsed but unmodified.
+      # We don't use Sinatra's parameters because they can be overridden by the
+      # body.
+      query_string = request.env["rack.request.query_string"]
+      request.body.rewind
+      begin
+        data = request.body.eof? ? {} : JSON.parse(request.body.read)
+      rescue => error
+        return {error: "Request body should be valid JSON."}
+      end
+
+      # Method names are implicitly sanitized by the route parameters, so we can
       # safely pass the request off.
       return {
-        data: resource.public_send(request.request_method.downcase.to_sym)
+        data: resource.public_send(
+          request.request_method.downcase.to_sym,
+          query_string,
+          data
+        )
       }
     })
   end
