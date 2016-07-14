@@ -10,7 +10,7 @@ module Helper
   rescue ResourceMethodInvalidException => e
     return JSON.generate({ error: 'The resource you requested can not respond to this request (see OPTIONS)' })
   rescue ResourceInvalidException => e
-    return JSON.generate({ error: 'The resource you requested does not exist (see OPTIONS)' })
+    return JSON.generate({ error: 'The resource you requested does not exist (Case sensitive!) (see OPTIONS)' })
   rescue ApplicationException => e
     return JSON.generate({ error: e.message })
   rescue => e

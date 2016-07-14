@@ -30,8 +30,13 @@ class Sandbox < Sinatra::Base
   route *$settings.resource_methods, '/:resource/?:id?' do |res, id|
     process_request(lambda {
       # If the class isn't required already, it isn't a resource.
-      raise ResourceInvalidException.new unless Object.const_defined?(res) &&
-        Object.const_get(res).is_a?(Class)
+      begin
+        raise ResourceInvalidException.new unless Object.const_defined?(res) &&
+          Object.const_get(res).is_a?(Class)
+      rescue NameError => e
+        # bad case
+        raise ResourceInvalidException.new
+      end
 
       resource = Object.const_get(res)
 

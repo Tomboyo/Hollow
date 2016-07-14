@@ -46,6 +46,14 @@ describe "The base sandbox app" do
     ) do |body|
       JSON.parse(body).must_include 'error'
     end
+
+    # Wrong Case
+    RequestGenerator.make_generic_requests(
+      %w[staticAndInstanceAccess Staticandinstanceaccess],
+      {}
+    ) do |body|
+      JSON.parse(body).must_include 'error'
+    end
   end
 
   it 'will discriminate between instance/static access of resources' do
