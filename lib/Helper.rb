@@ -16,7 +16,7 @@ module Helper
   rescue => e
     unless suppress_warnings
       warn "#{e}:"
-      warn error.backtrace.join("\n")
+      warn e.backtrace.join("\n")
     end
     return JSON.generate({ internal_error: "An internal error occurred" })
   end
