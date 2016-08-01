@@ -1,12 +1,12 @@
 development: &common_settings
   autorequire:
-    directories: [/lib, /resource]
+    directories: [/resource]
   resource_methods: [get, post, put, patch, delete, options]
 
 test:
   <<: *common_settings
   autorequire:
-    directories: [/lib, /resource, /test/resource]
+    directories: [ /resource, /test/resource]
 
 production:
   <<: *common_settings

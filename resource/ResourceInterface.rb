@@ -1,12 +1,11 @@
 # Default resource interface definition.
-# Implementing classes should include and/or extend ResourceInterface depending
-# on their functionality. If a resource will interface with a DB or otherwise
-# contain information particular to certain records, use include. If a resource
-# should instead (or alos) provide stateless functionality (static methods), use
-# extend. If a resource fails to include or extend ResourceInterface, the system
-# will prevent corresponding instance and static requests (/res/id, /res).
+# Implementing classes should extend ResourceInterface depending.
+# If a resource fails to extend ResourceInterface, the system
+# will prevent access to the resource (/res/id, /res).
 module ResourceInterface
   $settings.resource_methods.each do |route|
-    define_method(route) { |query, data| raise ResourceMethodInvalidException.new }
+    define_method(route) do |*|
+      raise ResourceMethodInvalidException.new
+    end
   end
 end

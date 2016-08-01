@@ -4,6 +4,8 @@ require "sinatra/config_file"
 require 'json'
 require 'require_all'
 
+require_rel 'lib'
+
 class Sandbox < Sinatra::Base
   register Sinatra::MultiRoute
   register Sinatra::ConfigFile
@@ -40,20 +42,18 @@ class Sandbox < Sinatra::Base
 
       resource = Object.const_get(res)
 
-      if id.nil?
-        # verify that resource extends the interface
-        raise ResourceInvalidException.new unless resource.is_a?(ResourceInterface) &&
-          resource.class != ResourceInterface
-      else
-        # verify that resource includes the interface
-        raise ResourceInvalidException.new unless resource.include? ResourceInterface
-        resource = resource.new(id.to_i)
-      end
+      # verify that resource extends the interface
+      raise ResourceInvalidException.new unless
+        resource.is_a?(ResourceInterface) && resource.class != ResourceInterface
+
+      method = request.request_method.downcase.to_sym
 
       # Get the query string and request body parsed but unmodified.
       # We don't use Sinatra's parameters because they can be overridden by the
       # body.
-      query_string = request.env["rack.request.query_string"]
+      query_string = request.env["rack.request.query_hash"]
+      query_string['id'] = id unless id.nil?
+
       request.body.rewind
       begin
         data = request.body.eof? ? {} : JSON.parse(request.body.read)
@@ -64,11 +64,7 @@ class Sandbox < Sinatra::Base
       # Method names are implicitly sanitized by the route parameters, so we can
       # safely pass the request off.
       return {
-        data: resource.public_send(
-          request.request_method.downcase.to_sym,
-          query_string,
-          data
-        )
+        data: resource.public_send(method, query_string, data)
       }
     })
   end
