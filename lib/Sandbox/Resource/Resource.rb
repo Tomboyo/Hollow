@@ -1,2 +1,4 @@
 # A mixin that marks a class as a Resource.
-module Sandbox::Resource ; end
+module Sandbox
+  class Resource ; end
+end
