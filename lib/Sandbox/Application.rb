@@ -26,30 +26,26 @@ module Sandbox
     end
 
     def handle_request(request)
-      begin
-        request[:resource] = request[:resource].to_sym
-        request[:method] = request[:method].downcase.to_sym
+      request[:resource] = request[:resource].to_sym
+      request[:method] = request[:method].downcase.to_sym
 
-        # Get the requested resource class
-        handler = Application::get_resource request[:resource]
+      # Get the requested resource class
+      handler = Application::get_resource request[:resource]
 
-        if @settings[:resource_methods].include?(request[:method]) &&
-            handler.method_defined?(request[:method])
-          return handler.public_send(method, request)
-        else
-          raise Sandbox::ResourceMethodException,
-              "The %s resource does not respond to %s requests" % [
-                request[:resource], request[:method]
-              ]
-        end
-      rescue Exception => e
-        raise Sandbox::SandboxException, "An unexpected error occurred"
+      if @settings[:resource_methods].include?(request[:method]) &&
+          handler.method_defined?(request[:method])
+        return handler.public_send(method, request)
+      else
+        raise Sandbox::ResourceMethodException,
+            "The %s resource does not respond to %s requests" % [
+              request[:resource], request[:method]
+            ]
       end
     end
 
     private
     def Application::get_resource(resource)
-      if Module.const_defined(resource)
+      if Module.const_defined?(resource)
         it = Object.const_get(resource)
 
         if it.is_a(Class) &&
