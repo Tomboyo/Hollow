@@ -12,31 +12,35 @@ describe Sandbox::Application do
 
   describe 'handle_request' do
     it 'Will forward requests to Resource-extending classes' do
+
       class AResource
         extend Sandbox::Resource
-        def get
-          5
-        end
+        def self.getHandler ; AResource.new ; end
+        def get(*args) ; 5 ; end
       end
-      assert_equals 5, application.handle_request(:resource => :AResource,
-          :method => :get)
+
+      assert_equal 5, application.handle_request(:AResource, :get)
     end
 
-    it 'Only forwards request to Resource-extending classes' do
-
-      NOTACLASS = 5
+    it 'Will not forward to non-Resource Objects' do
+      SOME_CONSTANT = 5
       assert_raises(Sandbox::ResourceException) {
-        application.handle_request(:resource => :NOTACLASS, :method => :get)
+        application.handle_request(:SOME_CONSTANT, :get)
       }
 
-      module AlsoNotAClass ; end
+      module SomeModule ; end
       assert_raises(Sandbox::ResourceException) {
-        application.handle_request(:resource => :AlsoNotAClass, :method => :get)
+        application.handle_request(:SomeModule, :get)
       }
 
-      class NotAResource ; end
+      class SomeClass ; end
       assert_raises(Sandbox::ResourceException) {
-        application.handle_request(:resource => :NotAResource, :method => :get)
+        application.handle_request(:SomeClass, :get)
+      }
+
+      some_instance = SomeClass.new
+      assert_raises(Sandbox::ResourceException) {
+        application.handle_request(:some_instance, :get)
       }
     end
   end
