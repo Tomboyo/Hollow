@@ -73,4 +73,15 @@ describe Sandbox::Application do
       @application.handle_request(:StumpResource, :get)
     end
   end
+
+  it 'Will not delegate to resources that do not define getHandler' do
+
+    class StumpResource
+      extend Sandbox::Resource
+    end
+
+    assert_raises(Sandbox::ResourceException) do
+      @application.handle_request(:StumpResource, :get)
+    end
+  end
 end
