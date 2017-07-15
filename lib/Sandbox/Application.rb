@@ -7,11 +7,11 @@ module Sandbox
   class Application
 
     DEFAULT_SETTINGS = {
-      :autorequire => {
-        :root => "#{File.dirname __FILE__}/../..",
-        :directories => ["resources"]
+      autorequire: {
+        root: "#{File.dirname __FILE__}/../..",
+        directories: ["resources"]
       },
-      :resource_methods => ["get", "post", "put", "patch", "delete", "options"]
+      resource_methods: ["get", "post", "put", "patch", "delete", "options"]
     }
 
     def initialize(settings = {})
@@ -22,12 +22,12 @@ module Sandbox
       end
     end
 
-    def handle_request(resource, method, args = {})
+    def handle_request(resource, method, args = [])
       begin
         handler = Application::get_resource(resource.to_sym)
             .getHandler
         method = method.to_sym.downcase
-      rescue NoMethodError, NameError => e
+      rescue NoMethodError, NameError
         raise Sandbox::ResourceException,
             "The resource #{resource} does not exist."
       end

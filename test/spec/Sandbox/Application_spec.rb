@@ -6,12 +6,12 @@ describe Sandbox::Application do
   before do
     @application = Sandbox::Application.new({
       # Do not require any resources outside this spec
-      :autorequire => {
-        :directories => []
+      autorequire: {
+        directories: []
       },
 
       # Only delegate get and post requests to Resources
-      :resource_methods => [:get, :post]
+      resource_methods: [:get, :post]
     })
   end
 
@@ -19,7 +19,7 @@ describe Sandbox::Application do
 
     class AResource
       extend Sandbox::Resource
-      def self.getHandler ; AResource.new ; end
+      def self.getHandler ; self.new ; end
       def get(*args) ; 5 ; end
     end
 
