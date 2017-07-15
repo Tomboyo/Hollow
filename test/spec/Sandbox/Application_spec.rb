@@ -8,7 +8,10 @@ describe Sandbox::Application do
       # Do not require any resources outside this spec
       :autorequire => {
         :directories => []
-      }
+      },
+
+      # Only delegate get and post requests to Resources
+      :resource_methods => [:get, :post]
     })
   end
 
@@ -38,5 +41,24 @@ describe Sandbox::Application do
     assert_raises(Sandbox::ResourceException) {
       @application.handle_request(:SomeClass, :get)
     }
+  end
+
+  it 'Only invokes configured resource methods' do
+
+    class HelloWorldResource
+      extend Sandbox::Resource
+      def self.getHandler ; self.new ; end
+      def get(*args) ; "Hello!" end
+      def post(*args) ; "World!" ; end
+    end
+
+    # get and post are fine
+    @application.handle_request(:HelloWorldResource, :get)
+    @application.handle_request(:HelloWorldResource, :post)
+
+    # patch is not configured!
+    assert_raises(Sandbox::ResourceMethodException) do
+      @application.handle_request(:HelloWorldResource, :patch)
+    end
   end
 end
