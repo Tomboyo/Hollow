@@ -61,4 +61,16 @@ describe Sandbox::Application do
       @application.handle_request(:HelloWorldResource, :patch)
     end
   end
+
+  it 'Will not invoke undefiend methods' do
+
+    class StumpResource
+      extend Sandbox::Resource
+      def self.getHandler ; self.new ; end
+    end
+
+    assert_raises(Sandbox::ResourceMethodException) do
+      @application.handle_request(:StumpResource, :get)
+    end
+  end
 end
