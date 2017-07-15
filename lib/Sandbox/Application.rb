@@ -22,7 +22,7 @@ module Sandbox
       end
     end
 
-    def handle_request(resource, method, args = [])
+    def handle_request(resource, method, args = {})
       begin
         handler = Application::get_resource(resource.to_sym)
             .getHandler

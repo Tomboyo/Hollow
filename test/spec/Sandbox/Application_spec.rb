@@ -84,4 +84,21 @@ describe Sandbox::Application do
       @application.handle_request(:StumpResource, :get)
     end
   end
+
+  it 'Delivers arguments to the Resource' do
+
+    class StatelessCalculatorResource
+      extend Sandbox::Resource
+
+      @handler = self.new
+
+      def self.getHandler ; @handler ; end
+      def get(a: 0, b: 0)
+        a + b
+      end
+    end
+
+    assert_equal 2, @application.handle_request(:StatelessCalculatorResource,
+        :get, {a: 1, b: 1})
+  end
 end
