@@ -101,4 +101,18 @@ describe Sandbox::Application do
     assert_equal 2, @application.handle_request(:StatelessCalculatorResource,
         :get, {a: 1, b: 1})
   end
+
+  it 'Will load classes from autorequire directories' do
+    # Load resources from test/resource/a
+    application = Sandbox::Application.new({
+      autorequire: {
+        root: "#{File.dirname __FILE__}/../../resource",
+        directories: [ 'a' ]
+      }
+    })
+
+    # A and B resources are autoloaded and available for get()ting
+    assert_equal "A", application.handle_request(:AResource, :get)
+    assert_equal "B", application.handle_request(:BResource, :get)
+  end
 end
