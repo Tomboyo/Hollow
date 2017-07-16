@@ -85,7 +85,7 @@ describe Sandbox::Application do
     end
   end
 
-  it 'Delivers arguments to the Resource' do
+  it 'Delivers arguments to the resource' do
 
     class StatelessCalculatorResource
       extend Sandbox::Resource
