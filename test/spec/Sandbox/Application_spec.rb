@@ -90,9 +90,9 @@ describe Sandbox::Application do
     class StatelessCalculatorResource
       extend Sandbox::Resource
 
-      @handler = self.new
+      HANDLER = self.new
 
-      def self.getHandler ; @handler ; end
+      def self.getHandler ; HANDLER ; end
       def get(a: 0, b: 0)
         a + b
       end
