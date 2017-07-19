@@ -25,7 +25,7 @@ module Sandbox
     def handle_request(resource, method, args = {})
       begin
         handler = Application::get_resource(resource.to_sym)
-            .getHandler
+            .get_instance
         method = method.to_sym.downcase
       rescue NoMethodError, NameError
         raise Sandbox::ResourceException,

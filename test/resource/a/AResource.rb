@@ -1,8 +1,5 @@
 class AResource
-  extend Sandbox::Resource
-  def self.getHandler
-    self.new
-  end
+  include Sandbox::Resource::Stateless
 
   def get(*args)
     "A"
