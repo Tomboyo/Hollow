@@ -9,7 +9,7 @@ module Sandbox
     DEFAULT_SETTINGS = {
       autorequire: {
         root: "#{File.dirname __FILE__}/../..",
-        directories: ["resources"]
+        directories: []
       },
       resource_methods: ["get", "post", "put", "patch", "delete", "options"]
     }
