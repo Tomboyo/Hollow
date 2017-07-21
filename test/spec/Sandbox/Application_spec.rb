@@ -13,12 +13,7 @@ describe Sandbox::Application do
   end
 
   before do
-    @application = Sandbox::Application.new({
-      # Do not require any resources outside this spec
-      autorequire: {
-        directories: []
-      }
-    })
+    @application = Sandbox::Application.new
   end
 
   it 'Delegates to Resources' do
@@ -53,6 +48,19 @@ describe Sandbox::Application do
     assert_raises(Sandbox::ResourceMethodException) do
       @application.handle_request(:TestResource, :some_method)
     end
+  end
+
+  it 'Can be configured to accept specific resource methods' do
+    application = Sandbox::Application.new({
+      resource_methods: ["foo"]
+    })
+
+    class FooResource
+      include Sandbox::Resource::Stateless
+      def foo(request) ; :bar ; end
+    end
+
+    assert_equal :bar, application.handle_request(:FooResource, :foo)
   end
 
   it 'Will not invoke undefiend methods' do
