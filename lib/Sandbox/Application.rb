@@ -24,8 +24,8 @@ module Sandbox
 
     def handle_request(resource, method, args = {})
       begin
-        handler = Application::get_resource(resource.to_sym)
-            .get_instance
+        resource_class = Application::get_resource(resource.to_sym)
+        handler = resource_class.get_instance
         method = method.to_sym.downcase
       rescue NoMethodError, NameError
         raise Sandbox::ResourceException,
@@ -34,6 +34,7 @@ module Sandbox
 
       if @settings[:resource_methods].include?(method) &&
           handler.respond_to?(method)
+        invoke_chain(resource_class, args, :before, method)
         return handler.public_send(method, args)
       else
         raise Sandbox::ResourceMethodException,
@@ -58,6 +59,12 @@ module Sandbox
       end
     end
 
+    def invoke_chain(resource, request, chain, method)
+      chains = resource.class_variable_get(:@@chains)
+      (chains[chain][:all] + chains[chain][method]).each do |chain_link|
+        chain_link.call(request)
+      end
+    end
   end
 
 end
