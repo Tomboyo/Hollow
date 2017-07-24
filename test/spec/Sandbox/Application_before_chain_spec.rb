@@ -11,7 +11,7 @@ describe Sandbox::Application do
 
     class BeforeChain
       include Sandbox::Resource::Stateless
-      include Sandbox::Resource::BeforeChain
+      include Sandbox::Resource::Chains
 
       chain_before :all, -> (request) { request[:test] << 1 }
       chain_before :get, -> (request) { request[:test] << 2 }
