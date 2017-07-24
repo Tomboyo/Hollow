@@ -13,10 +13,8 @@ describe Sandbox::Application do
       include Sandbox::Resource::Stateless
       include Sandbox::Resource::BeforeChain
 
-      @@before_chain = {
-        all: [ -> (request) { request[:test] << 1 }],
-        get: [ -> (request) { request[:test] << 2 }]
-      }
+      chain_before :all, -> (request) { request[:test] << 1 }
+      chain_before :get, -> (request) { request[:test] << 2 }
 
       def get(request)
         request[:test] << 3
