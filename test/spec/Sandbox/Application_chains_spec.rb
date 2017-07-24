@@ -14,17 +14,19 @@ describe Sandbox::Application do
       include Sandbox::Resource::Chains
 
       chain_before :all, -> (request) { request[:test] << 1 }
-      chain_before :get, -> (request) { request[:test] << 2 }
+      chain_before :all, -> (request) { request[:test] << 2 }
+      chain_before :get, -> (request) { request[:test] << 3 }
+      chain_before :get, -> (request) { request[:test] << 4 }
 
       def get(request)
-        request[:test] << 3
+        request[:test] << 5
       end
     end
 
     request = { test: [] }
     @application.handle_request(:BeforeChain, :get, request)
 
-    assert_equal [1, 2, 3], request[:test]
+    assert_equal [1, 2, 3, 4, 5], request[:test]
   end
 
 end
