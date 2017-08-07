@@ -35,7 +35,9 @@ module Sandbox
       if @settings[:resource_methods].include?(method) &&
           handler.respond_to?(method)
         invoke_chain(resource_class, args, :before, method)
-        return handler.public_send(method, args)
+        response = handler.public_send(method, args)
+        invoke_chain(resource_class, args, :after, method)
+        return response
       else
         raise Sandbox::ResourceMethodException,
             "The %s resource does not respond to %s requests" % [ resource,

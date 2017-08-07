@@ -4,7 +4,10 @@ module Sandbox
   module Resource
 
     def self.extended(base)
-      base.class_variable_set(:@@chains, { before: {} })
+      base.class_variable_set(:@@chains, {
+        before: {},
+        after:  {}
+      })
     end
 
     # A resource that handles all requests with the same instance
@@ -40,6 +43,11 @@ module Sandbox
         def base.chain_before(method, behavior)
           (self.class_variable_get(:@@chains)[:before][method] ||= []) <<
               behavior
+        end
+
+        def base.chain_after(method, behavior)
+          (self.class_variable_get(:@@chains)[:after][method] ||= []) <<
+            behavior
         end
       end
     end
