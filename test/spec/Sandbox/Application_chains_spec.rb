@@ -13,10 +13,10 @@ describe Sandbox::Application do
       include Sandbox::Resource::Stateless
       include Sandbox::Resource::Chains
 
-      chain_before :all, -> (request) { request[:test] << 1 }
-      chain_before :get, -> (request) { request[:test] << 3 }
-      chain_before :all, -> (request) { request[:test] << 2 }
-      chain_before :get, -> (request) { request[:test] << 4 }
+      chain :before, :all, -> (request) { request[:test] << 1 }
+      chain :before, :get, -> (request) { request[:test] << 3 }
+      chain :before, :all, -> (request) { request[:test] << 2 }
+      chain :before, :get, -> (request) { request[:test] << 4 }
 
       def get(request)
         request[:test] << 5
@@ -25,7 +25,6 @@ describe Sandbox::Application do
 
     request = { test: [] }
     @application.handle_request(:BeforeChain, :get, request)
-
     assert_equal [1, 2, 3, 4, 5], request[:test]
   end
 
@@ -34,10 +33,10 @@ describe Sandbox::Application do
       include Sandbox::Resource::Stateless
       include Sandbox::Resource::Chains
 
-      chain_after :all, -> (request) { request[:test] << 2 }
-      chain_after :get, -> (request) { request[:test] << 4 }
-      chain_after :all, -> (request) { request[:test] << 3 }
-      chain_after :get, -> (request) { request[:test] << 5 }
+      chain :after, :all, -> (request) { request[:test] << 2 }
+      chain :after, :get, -> (request) { request[:test] << 4 }
+      chain :after, :all, -> (request) { request[:test] << 3 }
+      chain :after, :get, -> (request) { request[:test] << 5 }
 
       def get(request)
         request[:test] << 1
@@ -46,7 +45,6 @@ describe Sandbox::Application do
 
     request = { test: [] }
     @application.handle_request(:AfterChain, :get, request)
-
     assert_equal [1, 2, 3, 4, 5], request[:test]
   end
 

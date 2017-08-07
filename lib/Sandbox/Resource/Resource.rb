@@ -40,14 +40,9 @@ module Sandbox
     module Chains
       def self.included(base)
 
-        def base.chain_before(method, behavior)
-          (self.class_variable_get(:@@chains)[:before][method] ||= []) <<
+        def base.chain(chain, method, behavior)
+          (self.class_variable_get(:@@chains)[chain][method] ||= []) <<
               behavior
-        end
-
-        def base.chain_after(method, behavior)
-          (self.class_variable_get(:@@chains)[:after][method] ||= []) <<
-            behavior
         end
       end
     end
