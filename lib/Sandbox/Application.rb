@@ -61,9 +61,8 @@ module Sandbox
 
     def invoke_chain(resource, request, chain, method)
       chains = resource.class_variable_get(:@@chains)
-      (chains[chain][:all] + chains[chain][method]).each do |chain_link|
-        chain_link.call(request)
-      end
+      links = (chains[chain][:all] || []) + (chains[chain][method] || [])
+      links.each { |chain_link| chain_link.call(request) }
     end
   end
 

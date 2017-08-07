@@ -3,6 +3,10 @@ module Sandbox
   # A mixin that marks a class as a Resource.
   module Resource
 
+    def self.extended(base)
+      base.class_variable_set(:@@chains, { before: {} })
+    end
+
     # A resource that handles all requests with the same instance
     module Stateless
       def self.included(base)
@@ -32,7 +36,6 @@ module Sandbox
 
     module Chains
       def self.included(base)
-        base.class_variable_set(:@@chains, { before: {} })
 
         def base.chain_before(method, behavior)
           (self.class_variable_get(:@@chains)[:before][method] ||= []) <<
