@@ -14,8 +14,8 @@ describe Sandbox::Application do
       include Sandbox::Resource::Chains
 
       chain_before :all, -> (request) { request[:test] << 1 }
-      chain_before :all, -> (request) { request[:test] << 2 }
       chain_before :get, -> (request) { request[:test] << 3 }
+      chain_before :all, -> (request) { request[:test] << 2 }
       chain_before :get, -> (request) { request[:test] << 4 }
 
       def get(request)
