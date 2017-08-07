@@ -17,36 +17,58 @@ describe Sandbox::Application do
   end
 
   it 'Delegates to Resources' do
-    assert_equal "Hello World!", @application.handle_request(
-        :TestResource, :get, "Hello World!")
+    assert_equal({}, @application.handle_request(
+      resource: :TestResource,
+      method:   :get,
+      data:     {}
+    ))
+  end
+
+  it 'Does not require a data payload' do
+    assert_equal({}, @application.handle_request(
+      resource: :TestResource,
+      method:   :get
+    ))
   end
 
   it 'Only delegates to actual Resources' do
     SOME_CONSTANT = 5
-    assert_raises(Sandbox::ResourceException) {
-      @application.handle_request(:SOME_CONSTANT, :get)
-    }
+    assert_raises(Sandbox::ResourceException) do
+      @application.handle_request(
+        resource: :SOME_CONSTANT,
+        method:   :get
+      )
+    end
 
     module SomeModule ; end
-    assert_raises(Sandbox::ResourceException) {
-      @application.handle_request(:SomeModule, :get)
-    }
+    assert_raises(Sandbox::ResourceException) do
+      @application.handle_request(
+        resource: :SomeModule,
+        method:   :get
+      )
+    end
 
     class SomeClass ; end
-    assert_raises(Sandbox::ResourceException) {
-      @application.handle_request(:SomeClass, :get)
-    }
+    assert_raises(Sandbox::ResourceException) do
+      @application.handle_request(
+        resource: :SomeClass,
+        method:   :get
+      )
+    end
   end
 
   it 'Only invokes configured resource methods' do
     # get and post are fine
-    @application.handle_request(:TestResource, :get)
-    @application.handle_request(:TestResource, :post)
+    @application.handle_request(resource: :TestResource, method: :get)
+    @application.handle_request(resource: :TestResource, method: :post)
 
     # some_method is defined by TestResource, but is not configured in
     # the application as an available Resource method
     assert_raises(Sandbox::ResourceMethodException) do
-      @application.handle_request(:TestResource, :some_method)
+      @application.handle_request(
+        resource: :TestResource,
+        method:   :some_method
+      )
     end
   end
 
@@ -60,19 +82,28 @@ describe Sandbox::Application do
       def foo(request) ; :bar ; end
     end
 
-    assert_equal :bar, application.handle_request(:FooResource, :foo)
+    assert_equal :bar, application.handle_request(
+      resource: :FooResource,
+      method: :foo
+    )
   end
 
   it 'Will not invoke undefiend methods' do
     assert_raises(Sandbox::ResourceMethodException) do
-      @application.handle_request(:TestResource, :garbanzo_beans)
+      @application.handle_request(
+        resource: :TestResource,
+        method:   :garbanzo_beans
+      )
     end
   end
 
-  it 'Delivers arguments to the resource' do
-    args = { a: "A!" }
-    assert_equal args, @application.handle_request(
-        :TestResource, :get, args)
+  it 'Delivers data to the resource' do
+    data = { a: "a" }
+    assert_equal data, @application.handle_request(
+        resource: :TestResource,
+        method:   :get,
+        data:     data
+    )
   end
 
   it 'Will load classes from autorequire directories' do
@@ -85,7 +116,14 @@ describe Sandbox::Application do
     })
 
     # A and B resources are autoloaded and available for get()ting
-    assert_equal "A", application.handle_request(:AResource, :get)
-    assert_equal "B", application.handle_request(:BResource, :get)
+    assert_equal "A", application.handle_request(
+      resource: :AResource,
+      method:   :get
+    )
+
+    assert_equal "B", application.handle_request(
+      resource: :BResource,
+      method:   :get
+    )
   end
 end

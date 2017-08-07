@@ -23,9 +23,13 @@ describe Sandbox::Application do
       end
     end
 
-    request = { test: [] }
-    @application.handle_request(:BeforeChain, :get, request)
-    assert_equal [1, 2, 3, 4, 5], request[:test]
+    data = { test: [] }
+    @application.handle_request(
+      resource: :BeforeChain,
+      method:   :get,
+      data:     data
+    )
+    assert_equal [1, 2, 3, 4, 5], data[:test]
   end
 
   it 'Invokes after-chain methods in order after Resource methods' do
@@ -43,9 +47,13 @@ describe Sandbox::Application do
       end
     end
 
-    request = { test: [] }
-    @application.handle_request(:AfterChain, :get, request)
-    assert_equal [1, 2, 3, 4, 5], request[:test]
+    data = { test: [] }
+    @application.handle_request(
+      resource: :AfterChain,
+      method:   :get,
+      data:     data
+    )
+    assert_equal [1, 2, 3, 4, 5], data[:test]
   end
 
 end

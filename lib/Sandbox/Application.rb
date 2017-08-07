@@ -22,24 +22,24 @@ module Sandbox
       end
     end
 
-    def handle_request(resource, method, args = {})
+    def handle_request(resource: nil, method: nil, data: {})
       begin
         resource_class = Application::get_resource(resource.to_sym)
         handler = resource_class.get_instance
         method = method.to_sym.downcase
       rescue NoMethodError, NameError
-        raise Sandbox::ResourceException,
+        fail Sandbox::ResourceException,
             "The resource #{resource} does not exist."
       end
 
       if @settings[:resource_methods].include?(method) &&
           handler.respond_to?(method)
-        invoke_chain(resource_class, args, :before, method)
-        response = handler.public_send(method, args)
-        invoke_chain(resource_class, args, :after, method)
+        invoke_chain(resource_class, data, :before, method)
+        response = handler.public_send(method, data)
+        invoke_chain(resource_class, data, :after, method)
         return response
       else
-        raise Sandbox::ResourceMethodException,
+        fail Sandbox::ResourceMethodException,
             "The %s resource does not respond to %s requests" % [ resource,
                 method ]
       end
