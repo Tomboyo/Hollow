@@ -6,7 +6,11 @@ class HelloWorld
   end
 
   def post(request)
-    "Hello #{request.data.name}!"
+    if (request[:data][:name] && !request[:data][:name].empty?)
+      "Hello, #{request[:data][:name]}!"
+    else
+      "Hello, whoever you are!"
+    end
   end
 
 end
