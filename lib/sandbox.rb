@@ -7,5 +7,4 @@ require_relative "sandbox/resource/stateful"
 require_relative "sandbox/resource/stateless"
 
 module Sandbox
-  # Your code goes here...
 end
