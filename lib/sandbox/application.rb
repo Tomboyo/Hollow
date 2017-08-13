@@ -1,6 +1,4 @@
 require 'require_all'
-require_relative 'Resource/Resource'
-require_relative 'exceptions'
 
 module Sandbox
 
