@@ -53,7 +53,7 @@ module Sandbox
             it.is_a?(Sandbox::Resource)
           return it
         else
-          raise Sandbox::ResourceException,
+          fail Sandbox::ResourceException,
               "The requested resource (\"#{resource}\") does not exist."
         end
       end
