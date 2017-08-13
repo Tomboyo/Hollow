@@ -1,5 +1,7 @@
 require 'minitest/autorun'
-require_relative '../../../lib/Sandbox/Application'
+require_relative '../../../lib/sandbox/application'
+require_relative '../../../lib/sandbox/resource/stateless/stateless'
+require_relative '../../../lib/sandbox/resource/stateful/stateful'
 
 describe Sandbox::Resource::Stateless do
 
