@@ -6,7 +6,7 @@ class HelloWorld
   end
 
   def post(request)
-    "Hello #{request.data.name}"
+    "Hello #{request.data.name}!"
   end
 
 end
