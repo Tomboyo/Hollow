@@ -1,5 +1,5 @@
 require 'sinatra/base'
-require 'sinatra/multi-route'
+require 'sinatra/multi_route'
 
 module Sandbox
 
