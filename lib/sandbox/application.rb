@@ -4,16 +4,10 @@ module Sandbox
 
   class Application
 
-    DEFAULT_SETTINGS = {
-      autorequire: {
-        root: "#{File.dirname __FILE__}/../..",
-        directories: []
-      },
-      resource_methods: ["get", "post", "put", "patch", "delete", "options"]
-    }
+    attr_reader :settings
 
     def initialize(settings = {})
-      @settings = DEFAULT_SETTINGS.merge(settings)
+      @settings = Sandbox::DEFAULT_SETTINGS.merge(settings)
       @settings[:resource_methods].map! { |m| m.to_sym }
       @settings[:autorequire][:directories].each do |dir|
         require_all "#{@settings[:autorequire][:root]}/#{dir}"
