@@ -9,13 +9,12 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Tom Simmons"]
   spec.email         = ["tomasimmons@gmail.com"]
 
-  spec.summary       = "RESTful plugin for request handling"
+  spec.summary       = "Bridge the gap from routing to Resource."
   spec.description   = %q{
-    Hollow is not a framework--it is a drop-in component used for creating
-    RESTful services. You forward requests to Hollow from your routing solution
-    (Sinatra?); Hollow then autoloads an appropriate class if necessary to
-    handle the request. Additional tools are provided as well, such as filters
-    to invoke before and after a resource handles a request ("request chains").
+    Hollow is a drop-in component for building RESTful services that bridges
+    from any routing solution (like Sinatra) to your back-end. You flesh out
+    your service with Resource classes, you pick a Router to forward some
+    traffic to Hollow, and it works. GET /HelloWorld becomes HelloWorld.get().
   }
   spec.homepage      = "https://www.github.com/tomboyo/hollow"
   spec.license       = "MIT"
@@ -23,13 +22,13 @@ Gem::Specification.new do |spec|
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
   if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
+    spec.metadata["allowed_push_host"] = 'http://mygemserver.com'
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
   end
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
+  spec.files = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features|examples)/})
   end
   spec.require_paths = ["lib"]
