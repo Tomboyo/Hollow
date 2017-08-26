@@ -1,5 +1,5 @@
 class HelloWorld
-  include Sandbox::Resource::Stateless
+  include Hollow::Resource::Stateless
 
   def get(request)
     "Hello World!"

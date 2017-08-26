@@ -1,10 +1,10 @@
-require 'sandbox'
-require 'sandbox/sinatra_router_factory'
+require 'hollow'
+require 'hollow/sinatra_router_factory'
 #require 'sinatra'
 #require 'sinatra/multi_route'
 
-Sandbox::SinatraRouterFactory::create_router_for(
-  Sandbox::Application.new(
+Hollow::SinatraRouterFactory::create_router_for(
+  Hollow::Application.new(
     autorequire: {
       root: "#{File.dirname __FILE__}", # This directory is the application root
       directories: ['resources']        # Resource types are in ./resouces

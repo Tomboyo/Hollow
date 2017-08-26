@@ -1,4 +1,4 @@
-module Sandbox
+module Hollow
   module Resource
 
     module Chains

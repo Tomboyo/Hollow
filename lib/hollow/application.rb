@@ -1,13 +1,13 @@
 require 'require_all'
 
-module Sandbox
+module Hollow
 
   class Application
 
     attr_reader :settings
 
     def initialize(settings = {})
-      @settings = Sandbox::DEFAULT_SETTINGS.merge(settings)
+      @settings = Hollow::DEFAULT_SETTINGS.merge(settings)
       @settings[:resource_methods].map! { |m| m.to_sym }
       @settings[:autorequire][:directories].each do |dir|
         require_all "#{@settings[:autorequire][:root]}/#{dir}"
@@ -20,7 +20,7 @@ module Sandbox
         handler = resource_class.get_instance
         method = method.to_sym.downcase
       rescue NoMethodError, NameError
-        fail Sandbox::ResourceException,
+        fail Hollow::ResourceException,
             "The resource #{resource} does not exist."
       end
 
@@ -31,7 +31,7 @@ module Sandbox
         invoke_chain(resource_class, data, :after, method)
         return response
       else
-        fail Sandbox::ResourceMethodException,
+        fail Hollow::ResourceMethodException,
             "The %s resource does not respond to %s requests" % [ resource,
                 method ]
       end
@@ -43,11 +43,11 @@ module Sandbox
         it = Object.const_get(resource)
 
         if it.is_a?(Class) &&
-            it.class != Sandbox::Resource &&
-            it.is_a?(Sandbox::Resource)
+            it.class != Hollow::Resource &&
+            it.is_a?(Hollow::Resource)
           return it
         else
-          fail Sandbox::ResourceException,
+          fail Hollow::ResourceException,
               "The requested resource (\"#{resource}\") does not exist."
         end
       end

@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'rack/test'
-require_relative '../../../lib/sandbox'
-require_relative '../../../lib/sandbox/sinatra_router_factory'
+require_relative '../../../lib/hollow'
+require_relative '../../../lib/hollow/sinatra_router_factory'
 
 include Rack::Test::Methods
 
@@ -10,23 +10,23 @@ ENV['RACK_ENV'] = 'test'
 # A Rack::Test hook. The application class returned will be the target for test
 # methods like get, post, put, patch.
 def app
-  Sandbox::SinatraRouterFactory::create_router_for(Sandbox::Application.new)
+  Hollow::SinatraRouterFactory::create_router_for(Hollow::Application.new)
 end
 
-describe Sandbox::SinatraRouterFactory do
+describe Hollow::SinatraRouterFactory do
 
   describe 'create_router_for' do
     it 'Creates a new class which extends Sinatra::Base' do
-      type = Sandbox::SinatraRouterFactory::create_router_for(
-          Sandbox::Application.new)
+      type = Hollow::SinatraRouterFactory::create_router_for(
+          Hollow::Application.new)
       assert type.kind_of?(Sinatra::Base.class)
     end
 
-    it 'Creates a class that routes to a Sandbox::Application' do
+    it 'Creates a class that routes to a Hollow::Application' do
       # The router is using default settings and as such will listen for get
       # put, post, and more.
       class TestResource
-        include Sandbox::Resource::Stateless
+        include Hollow::Resource::Stateless
         def get(data)  ; "response" ; end
         def post(data) ; "response" ; end
         # No Put!

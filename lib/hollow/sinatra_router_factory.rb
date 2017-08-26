@@ -1,12 +1,12 @@
 require 'sinatra/base'
 require 'sinatra/multi_route'
 
-module Sandbox
+module Hollow
 
   class SinatraRouterFactory
 
     # Create a new Sinatra router class which routes pertinent requests to the
-    # passed-in Sandbox application.
+    # passed-in Hollow application.
     # Sinatra will only know to handle the application-configured request
     # methods--If your application is set to handle get and post, the Sinatra
     # router won't service a Patch, even for a valid resource. You will see a
@@ -28,7 +28,7 @@ module Sandbox
                 method:   request.request_method,
                 data:     request.params
             )
-          rescue Sandbox::SandboxException => e
+          rescue Hollow::HollowException => e
             # User-safe error message
             "Could not handle request: #{e.message}"
           rescue Exception => e

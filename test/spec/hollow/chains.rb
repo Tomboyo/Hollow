@@ -1,17 +1,17 @@
 require 'minitest/autorun'
-require_relative '../../../lib/sandbox'
+require_relative '../../../lib/hollow'
 
-describe Sandbox::Application do
+describe Hollow::Application do
 
   before do
-    @application = Sandbox::Application.new
+    @application = Hollow::Application.new
   end
 
   it 'Invokes before-chain methods in order before Resource methods' do
 
     class BeforeChain
-      include Sandbox::Resource::Stateless
-      include Sandbox::Resource::Chains
+      include Hollow::Resource::Stateless
+      include Hollow::Resource::Chains
 
       chain :before, :all, -> (request) { request[:test] << 1 }
       chain :before, :get, -> (request) { request[:test] << 3 }
@@ -34,8 +34,8 @@ describe Sandbox::Application do
 
   it 'Invokes after-chain methods in order after Resource methods' do
     class AfterChain
-      include Sandbox::Resource::Stateless
-      include Sandbox::Resource::Chains
+      include Hollow::Resource::Stateless
+      include Hollow::Resource::Chains
 
       chain :after, :all, -> (request) { request[:test] << 2 }
       chain :after, :get, -> (request) { request[:test] << 4 }

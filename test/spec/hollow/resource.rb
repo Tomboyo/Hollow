@@ -1,10 +1,10 @@
 require 'minitest/autorun'
-require_relative '../../../lib/sandbox'
+require_relative '../../../lib/hollow'
 
-describe Sandbox::Resource::Stateless do
+describe Hollow::Resource::Stateless do
 
   class StatelessResource
-    include Sandbox::Resource::Stateless
+    include Hollow::Resource::Stateless
   end
 
   it 'Only creates a single instance of the Resource' do
@@ -13,20 +13,20 @@ describe Sandbox::Resource::Stateless do
   end
 
   it 'Is also a Resource' do
-    assert StatelessResource.kind_of?(Sandbox::Resource)
+    assert StatelessResource.kind_of?(Hollow::Resource)
   end
 
   it 'Creates one instance per Resource type' do
-    class A ; include Sandbox::Resource::Stateless ; end
-    class B ; include Sandbox::Resource::Stateless ; end
+    class A ; include Hollow::Resource::Stateless ; end
+    class B ; include Hollow::Resource::Stateless ; end
 
     refute_equal A.get_instance, B.get_instance
   end
 end
 
-describe Sandbox::Resource::Stateful do
+describe Hollow::Resource::Stateful do
   class StatefulResource
-    include Sandbox::Resource::Stateful
+    include Hollow::Resource::Stateful
   end
 
   it 'Creates multiple instances of the Resource' do
@@ -34,6 +34,6 @@ describe Sandbox::Resource::Stateful do
   end
 
   it 'Is also a Resource' do
-    assert StatefulResource.kind_of?(Sandbox::Resource)
+    assert StatefulResource.kind_of?(Hollow::Resource)
   end
 end

@@ -1,23 +1,23 @@
 # coding: utf-8
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "sandbox/version"
+require "hollow/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "sandbox"
-  spec.version       = Sandbox::VERSION
+  spec.name          = "hollow"
+  spec.version       = Hollow::VERSION
   spec.authors       = ["Tom Simmons"]
   spec.email         = ["tomasimmons@gmail.com"]
 
   spec.summary       = "RESTful plugin for request handling"
   spec.description   = %q{
-    Sandbox is not a framework--it is a drop-in component used for creating
-    RESTful services. You forward requests to Sandbox from your routing solution
-    (Sinatra?); Sandbox then autoloads an appropriate class if necessary to
+    Hollow is not a framework--it is a drop-in component used for creating
+    RESTful services. You forward requests to Hollow from your routing solution
+    (Sinatra?); Hollow then autoloads an appropriate class if necessary to
     handle the request. Additional tools are provided as well, such as filters
     to invoke before and after a resource handles a request ("request chains").
   }
-  spec.homepage      = "https://www.github.com/tomboyo/sandbox"
+  spec.homepage      = "https://www.github.com/tomboyo/hollow"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'

@@ -1,11 +1,11 @@
-module Sandbox
+module Hollow
   module Resource
 
     # A resource that handles all requests with the same instance
     module Stateless
       def self.included(base)
-        unless base.is_a?(Sandbox::Resource)
-          base.extend(Sandbox::Resource)
+        unless base.is_a?(Hollow::Resource)
+          base.extend(Hollow::Resource)
         end
 
         base.class_variable_set(:@@instance, base.new)
@@ -14,6 +14,6 @@ module Sandbox
         end
       end
     end
-    
+
   end
 end
