@@ -1,38 +1,49 @@
-Hollow is a simple REST server skeleton built atop Sinatra. It provides a dynamic routing configuration and simple a resource scheme for creating API servers that respond to requests of the form `HTTP_METHOD www.site.com/resource/?id`, where `resource` is an API resource capable of responding to requests and `id` is an optional parameter that uniquely identifies resource records.
+# Hollow
 
-An application built on Hollow primarily relies on a collection of classes in the `/resources` folder (the location and name of which is arbitrary and configurable), each of which implement a *resource interface* that registers them within the application as being publicly available to service requests. Resources define methods named after HTTP method types, such as :get and :post, which are invoked by the application to respond to corresponding requests. For instance, a request to `GET /MyResource/5` triggers the application to invoke the :get method of the MyResource class. However, Hollow applications will discriminate when doing so, rejecting requests that name non-existent resources or name classes that do not extend the `ResourceInterface` module. If a requested resource is valid, Hollow applications will only invoke the HTTP-named methods of the resource, and then only if they are public, so that you may attach server-private functionality to your resource files. As implementors of the `ResourceInterface` contract, all resource classes come with some basic functionality provided by the module. Until you override the default functionality of a HTTP-named method of a resource, it will respond to requests with the following message:
+> Hollow is a drop-in component for building RESTful services that bridges from any routing solution (like Sinatra) to your back-end. You flesh out your service with Resource classes, you pick a Router to forward some traffic to Hollow, and it works. GET /HelloWorld becomes HelloWorld.get().
 
-    { "error": "The resource you requested can not respond to this request (see OPTIONS)" }
+With Hollow, any class which includes `Hollow::Resource::Stateless` or `Stateful` is a REST resource capable of servicing certain kinds of requests. Let's say we want to respond to POST requests with a greeting like, "Hello, Tomboyo!":
 
-Do note that this message encourages your user to send an OPTIONS request to the resource to learn how to use the API, so make sure you override the :options method. Incidentally, it... also generates that message.
+```ruby
+class HelloWorld
+  include Hollow::Resource::Stateless
+  def post(request)
+    if (request['name'] && !request['name'].empty?)
+      "Hello, #{request['name']}!"
+    else
+      "Hello, whoever you are!"
+    end
+  end
+end
+```
 
-To launch your application, run `launch.rb`.
+We save that to `./resources/HelloWorld.rb`. Now we want to expose it to the world, so we make a `./server.rb` script. Using Hollow, we first create an `Application` object:
 
-Config.yml
-----------
-This is the configuration file for your server. Hollow allows you to configure which HTTP methods your resources are allowed to respond to by adjusting the items in the development.resource_methods array. If a method is not listed in this array, requests utilizing this method will garner a response prompting the user to send an OPTIONS request. The location of resources and other necessary system files may be added to the development.autorequire.directories array to further configure your system. Note that *any* folder may act as the "resources" folder, or many folders can act in this capacity. Thus, this is your means of deciding where your resources are (which are indicated to the system by extending the `ResourceInterface`, see below). The development environment configuration is the default from which test and production inherit, so changes made here will cascade to the other environments, as well. The provided config.yml has an overriding setup for the test environment, allowing different files to be included in the system for testing purposes.
+```ruby
+my_app = Hollow::Application.new(
+  autorequire: {
+    root: "#{File.dirname __FILE__}",
+    directories: ['resources']
+  },
+  resource_methods: %i(post)
+)
+```
+The application instance is configured to look for resources in `./resources`, which is where `HelloWorld` is defined. We've also decided that we only want to handle POST requests for now. Finally, we simply pipe HTTP traffic to the application’s `handle_request` method. Using Sinatra:
 
-    # Config.yml snippet showing the default development settings
-    development: &common_settings
-      autorequire:
-        directories: [/resource]
-      resource_methods: [get, post, put, patch, delete, options]
+```ruby
+get ‘/:resource’ do |resource|
+  my_app.handle_request(
+    resource: resource,
+    method:   request.request_method,
+    data:     request.params
+)
+```
+Start the server and `curl 127.0.0.1:4567/HelloWorld -d "name=Tomboyo"` to be given an enthusiastic greeting. If we want to create any more functionality, we just create new classes where Hollow can find them. That's all!
 
-ResourceInterface
------------------
-This module is the interface which all resources in your system must implement. It provides no functionality other than defaulting every Resource::HTTP_METHOD call to raise a ResourceMethodInvalidEception, which is caught by Hollow and returned to the user as the informative message we say earlier. Any class which implements ResourceInterface via extending the module is considered a resource by Hollow and will have its public HTTP-named methods made available to service requests. Private and protected methods will not be available, and nor will any methods whose names do not match HTTP request methods (as configured in Config.yml). Any class which does not implement ResourceInterface will not be publicly accessible. Note that it is the act of extending `ResourceInterface` which makes a class a resource, *not* the virtue of being in a particular folder.
+# What about other classes and methods?
 
-Hollow Exceptions
-------------------
-Hollow comes with three custom StdError classes: `ApplicationException`, `ResourceInvalidException`, and `ResourceMethodInvalidException`. The former is raised for generic user-error related issues, such as bad data payloads with invalid or missing parameters. There are meant for you to raise to send informative messages to the user, such as 'Missing ID' or 'A record with id 10 was not found', since Hollow will rescue all such exceptions and package their message in a standardized error payload. ResourceInvalidExceptions and ResourceMethodInvalidExceptions are raised and rescued by Hollow in order to standardize API messages reporting that a requested resource was not found or that it can not service a given request (because your Resource does not override the ResourceInterface for the given HTTP name).
+Only classes, and only classes which include `Hollow::Resource::Stateless` or `Hollow::Resource::Stateful` can service reqeusts. Only resource methods matching the symbols configured via the `resource_methods: %i(post)` parameter during application instantiation can be invoked, as well--other methods are hidden. That means if you only make a `HelloWorld` resource and your application only has `post` configured, your application only invokes `HelloWorld`'s `post`, and nothing else, ever.
 
-Examples
---------
-The `test/resource` folder contains two classes, Access and NoAccess. The former is a valid resource in the application and can be accessed via API calls to `GET /Access/id?`, where id may be any value or none at all. The static method Access::get will be invoked and the result parsed by Hollow into JSON, which will respond to the request. NoAccess does NOT implement ResourceInterface, and so even though it is in the resources folder and included in the system, it will not be available under `METHOD /NoAccess/id?' for any METHOD or any id.
+# Is this only for REST?
 
-Gotchas
--------
-- Resource names are case-sensitive in the API. A request to `/MyResource/` is different from a request to `/myResource/`.
-- Resources should return data as it should appear within the `data` structure of the response payload. Hollow will standardize the output of your resources so you don't need to do so yourself.
-- Error messages should always be sent to the user via ApplicationException.new, not by returning a string within a resource. Hollow will rescue these exceptions and package their messages into the `error` structure of the response payload.
-- Internal server errors are reported via payloads with `internal_error` keys. The message sent back is entirely banal, but if your UI only listens for `data` and `error` but not `internal_error`, it may miss these responses and silently fail.
+Hollow was designed for REST, but it's not limited in that respect. `Application` can be configured with nonstandard request methods (making resource.myRequestMethodHere a legal request handler), so really `Application` is a mapping from binary identifiers (HelloWorld, post) to methods (HelloWorld post(resource)).
