@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'rack/test'
-require_relative '../../../lib/hollow'
-require_relative '../../../lib/hollow/sinatra_router_factory'
+require 'hollow'
+require_relative '../lib/sinatra_router_factory'
 
 include Rack::Test::Methods
 
@@ -10,14 +10,14 @@ ENV['RACK_ENV'] = 'test'
 # A Rack::Test hook. The application class returned will be the target for test
 # methods like get, post, put, patch.
 def app
-  Hollow::SinatraRouterFactory::create_router_for(Hollow::Application.new)
+  SinatraRouterFactory::create_router_for(Hollow::Application.new)
 end
 
-describe Hollow::SinatraRouterFactory do
+describe SinatraRouterFactory do
 
   describe 'create_router_for' do
     it 'Creates a new class which extends Sinatra::Base' do
-      type = Hollow::SinatraRouterFactory::create_router_for(
+      type = SinatraRouterFactory::create_router_for(
           Hollow::Application.new)
       assert type.kind_of?(Sinatra::Base.class)
     end
