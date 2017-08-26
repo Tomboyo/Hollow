@@ -1,3 +1,4 @@
+# Hollow will automatically forward requests like GET /HelloWorld to this class.
 class HelloWorld
   include Hollow::Resource::Stateless
 
