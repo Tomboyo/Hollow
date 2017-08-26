@@ -42,7 +42,7 @@ Start the server and `curl 127.0.0.1:4567/HelloWorld -d "name=Tomboyo"` to be gi
 
 # What about other classes and methods?
 
-Only classes, and only classes which include `Hollow::Resource::Stateless` or `Hollow::Resource::Stateful` can service reqeusts. Only resource methods matching the symbols configured via the `resource_methods: %i(post)` parameter during application instantiation can be invoked, as well--other methods are hidden. That means if you only make a `HelloWorld` resource and your application only has `post` configured, your application only invokes `HelloWorld`'s `post`, and nothing else, ever.
+Only classes, and only classes which include `Hollow::Resource::Stateless` or `Hollow::Resource::Stateful` can service requests. Only resource methods matching the symbols configured via the `resource_methods: %i(post)` parameter during application instantiation can be invoked, as well; other methods are hidden. That means if you only make a `HelloWorld` resource and your application only has `post` configured, your application only invokes `HelloWorld`'s `post`. Nothing else, ever.
 
 # Is this only for REST?
 
