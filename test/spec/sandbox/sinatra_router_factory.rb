@@ -38,11 +38,6 @@ describe Sandbox::SinatraRouterFactory do
       assert last_response.ok?
       assert_equal "response", last_response.body
 
-      # For whatever reason, rack raises an invalid URI exception after our
-      # application complains that we've requested an invalid resource method.
-      # As a consequence, we get the sanitized error message instead of the
-      # correct and informative one. This is not the case when CURLing the
-      # server from the command line.
       put '/TestResource'
       assert last_response.ok?
       refute_equal "response", last_response.body
