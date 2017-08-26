@@ -5,7 +5,12 @@ module Sandbox
 
   class SinatraRouterFactory
 
-    public
+    # Create a new Sinatra router class which routes pertinent requests to the
+    # passed-in Sandbox application.
+    # Sinatra will only know to handle the application-configured request
+    # methods--If your application is set to handle get and post, the Sinatra
+    # router won't service a Patch, even for a valid resource. You will see a
+    # "doesn't know this ditty" in that case.
     def self.create_router_for(application)
       Class.new(Sinatra::Base) do
         register Sinatra::MultiRoute

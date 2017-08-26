@@ -7,6 +7,8 @@ include Rack::Test::Methods
 
 ENV['RACK_ENV'] = 'test'
 
+# A Rack::Test hook. The application class returned will be the target for test
+# methods like get, post, put, patch.
 def app
   Sandbox::SinatraRouterFactory::create_router_for(Sandbox::Application.new)
 end
