@@ -1,7 +1,11 @@
 module Hollow
   module Resource
 
-    # A resource that handles all requests with the same instance
+    # Marks a class as a {Hollow::Resource} that may be used by
+    # {Hollow::Application} instances to handle requests. Including this module
+    # creates a singleton instance of the class which will service all requests
+    # from all Application instances.
+    # @see Hollow::Resource::Stateful
     module Stateless
       def self.included(base)
         unless base.is_a?(Hollow::Resource)
