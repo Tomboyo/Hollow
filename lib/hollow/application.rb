@@ -2,10 +2,40 @@ require 'require_all'
 
 module Hollow
 
+  # A RESTful service provider framework which provides dynamic access to REST
+  # resource objects, allowing routers to service reqeusts without any knowledge
+  # of the types that exist in business code.
+  #
+  # - Resource classes compose the service provider aspect of Hollow and
+  # encapsulate all or part of a system's business logic.
+  # - Any class can be registered as a resource by including one of the
+  # Stateless[Resource/Stateless] or Stateful[Resource/Stateful] modules.
+  # - The service provider API is defined dynamically by application instance
+  # configuration (see settings[Application#settings-instance_method]).
+  # Different application instances can use the same underlying resources, but
+  # they will filter access to those resources differently. Requests through one
+  # application instance may succeed while requests through another may raise
+  # access exceptions.
+  # - Application instances provide service access to resources via the
+  # handle_request[#handle_request] method.
   class Application
 
+    # @return [Hash] the application settings
     attr_reader :settings
 
+    # Create a new application instance.
+    # @param [Hash] settings application settings. See
+    #   {Hollow::DEFAULT_SETTINGS} for defaults.
+    # @option settings [Array<Symbol>, Array<String>] :resource_methods
+    #   Resource method names which may be invoked on resource instances by
+    #   this application. This effectively defines the service provider API.
+    # @option settings [String] :autorequire[:root]
+    #   location in the file system relative to which other filesystem locations
+    #   are evaluated.
+    # @option settings [Array<String>] :autorequire[:directories]
+    #   file system locations where resource classes may be found; all classes
+    #   in these directories will be required immediately. These locations are
+    #   relative to `:autorequire[:root]`.
     def initialize(settings = {})
       @settings = Hollow::DEFAULT_SETTINGS.merge(settings)
       @settings[:resource_methods].map! { |m| m.to_sym }
@@ -14,6 +44,21 @@ module Hollow
       end
     end
 
+    # Attempt to invoke a resource method with the given data.
+    #
+    # @param [String, Symbol] resource
+    #   The case-sensitive name of a desired resource.
+    # @param [String, Symbol] method
+    #   The case-sensitive resource method name to invoke.
+    # @param [Hash] data
+    #   Any data which the resource may or may not use to handle the reqeust.
+    # @raise [Hollow::ResourceException]
+    #   If the indicated resource is not defined, is not a Class, is
+    #   {Hollow::Resource} itself, or is not a type of {Hollow::Resource}.
+    # @raise [Hollow::ResourceMethodException]
+    #   If the indicated resource exists and:
+    #     1. The indicated method is not accessible or defined, or
+    #     2. The method name is not included in `settings[:resource_methods]`.
     def handle_request(resource: nil, method: nil, data: {})
       begin
         resource_class = Application::get_resource(resource.to_sym)
