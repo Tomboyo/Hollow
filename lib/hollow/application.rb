@@ -20,6 +20,38 @@ module Hollow
   # handle_request[#handle_request] method.
   class Application
 
+    # Indicates an illegal resource name.
+    class ResourceException < Hollow::HollowException
+      # The illegal resource name.
+      attr_reader :resource_name
+
+      private
+      def initialize(resource_name)
+        super("The resource #{resource_name} does not exist.")
+        @resource_name = resource_name
+      end
+    end
+
+    # Indicates an illegal resource method name.
+    class ResourceMethodException < Hollow::HollowException
+      # The legal resource name provided for the request.
+      attr_reader :resource_name
+
+      # The illegal method name.
+      attr_reader :method_name
+
+      private
+      def initialize(resource_name, method_name)
+        super("The %s resource does not respond to %s requests" % [
+            resource_name,
+            method_name
+        ])
+
+        @resource_name = resource_name
+        @method_name = method_name
+      end
+    end
+
     # @return [Hash] the application settings
     attr_reader :settings
 
@@ -65,8 +97,7 @@ module Hollow
         handler = resource_class.get_instance
         method = method.to_sym.downcase
       rescue NoMethodError, NameError
-        fail Hollow::ResourceException,
-            "The resource #{resource} does not exist."
+        fail ResourceException.new resource
       end
 
       if @settings[:resource_methods].include?(method) &&
@@ -76,9 +107,7 @@ module Hollow
         invoke_chain(resource_class, data, :after, method)
         return response
       else
-        fail Hollow::ResourceMethodException,
-            "The %s resource does not respond to %s requests" % [ resource,
-                method ]
+        fail ResourceMethodException.new resource, method
       end
     end
 
@@ -92,8 +121,7 @@ module Hollow
             it.is_a?(Hollow::Resource)
           return it
         else
-          fail Hollow::ResourceException,
-              "The requested resource (\"#{resource}\") does not exist."
+          fail ResourceException.new resource
         end
       end
     end

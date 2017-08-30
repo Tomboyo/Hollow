@@ -1,7 +1,5 @@
 require 'hollow'
 require 'hollow/sinatra_router_factory'
-#require 'sinatra'
-#require 'sinatra/multi_route'
 
 Hollow::SinatraRouterFactory::create_router_for(
   Hollow::Application.new(
