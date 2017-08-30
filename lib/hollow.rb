@@ -1,5 +1,5 @@
+require_relative "hollow/hollow_exception"
 require_relative "hollow/application"
-require_relative "hollow/exceptions"
 require_relative "hollow/resource"
 require_relative "hollow/version"
 require_relative "hollow/resource/chains"
