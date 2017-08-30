@@ -6,6 +6,7 @@ module Hollow
   # {Hollow::Resource::Stateful} instead.
   module Resource
 
+    private
     def self.extended(base)
       base.class_variable_set(:@@chains, {
         before: {},

@@ -52,12 +52,21 @@ module Hollow
       end
     end
 
+    # Default application settings.
+    DEFAULT_SETTINGS = {
+      autorequire: {
+        root: "#{File.dirname __FILE__}/../..",
+        directories: []
+      },
+      resource_methods: ["get", "post", "put", "patch", "delete", "options"]
+    }
+
     # @return [Hash] the application settings
     attr_reader :settings
 
     # Create a new application instance.
-    # @param [Hash] settings application settings. See
-    #   {Hollow::DEFAULT_SETTINGS} for defaults.
+    # @param [Hash] settings application settings. See {DEFAULT_SETTINGS} for
+    #   defaults.
     # @option settings [Array<Symbol>, Array<String>] :resource_methods
     #   Resource method names which may be invoked on resource instances by
     #   this application. This effectively defines the service provider API.
@@ -69,7 +78,7 @@ module Hollow
     #   in these directories will be required immediately. These locations are
     #   relative to `:autorequire[:root]`.
     def initialize(settings = {})
-      @settings = Hollow::DEFAULT_SETTINGS.merge(settings)
+      @settings = DEFAULT_SETTINGS.merge(settings)
       @settings[:resource_methods].map! { |m| m.to_sym }
       @settings[:autorequire][:directories].each do |dir|
         require_all "#{@settings[:autorequire][:root]}/#{dir}"
@@ -84,10 +93,10 @@ module Hollow
     #   The case-sensitive resource method name to invoke.
     # @param [Hash] data
     #   Any data which the resource may or may not use to handle the reqeust.
-    # @raise [Hollow::ResourceException]
+    # @raise [ResourceException]
     #   If the indicated resource is not defined, is not a Class, is
     #   {Hollow::Resource} itself, or is not a type of {Hollow::Resource}.
-    # @raise [Hollow::ResourceMethodException]
+    # @raise [ResourceMethodException]
     #   If the indicated resource exists and:
     #     1. The indicated method is not accessible or defined, or
     #     2. The method name is not included in `settings[:resource_methods]`.

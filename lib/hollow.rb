@@ -6,12 +6,6 @@ require_relative "hollow/resource/chains"
 require_relative "hollow/resource/stateful"
 require_relative "hollow/resource/stateless"
 
+# Root namespace for Hollow
 module Hollow
-  DEFAULT_SETTINGS = {
-    autorequire: {
-      root: "#{File.dirname __FILE__}/../..",
-      directories: []
-    },
-    resource_methods: ["get", "post", "put", "patch", "delete", "options"]
-  }
 end

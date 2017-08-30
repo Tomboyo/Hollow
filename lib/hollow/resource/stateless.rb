@@ -7,6 +7,7 @@ module Hollow
     # from all Application instances.
     # @see Hollow::Resource::Stateful
     module Stateless
+      private
       def self.included(base)
         unless base.is_a?(Hollow::Resource)
           base.extend(Hollow::Resource)
