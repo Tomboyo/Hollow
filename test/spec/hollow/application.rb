@@ -33,7 +33,7 @@ describe Hollow::Application do
 
   it 'Only delegates to actual Resources' do
     SOME_CONSTANT = 5
-    assert_raises(Hollow::ResourceException) do
+    assert_raises(Hollow::Application::ResourceException) do
       @application.handle_request(
         resource: :SOME_CONSTANT,
         method:   :get
@@ -41,7 +41,7 @@ describe Hollow::Application do
     end
 
     module SomeModule ; end
-    assert_raises(Hollow::ResourceException) do
+    assert_raises(Hollow::Application::ResourceException) do
       @application.handle_request(
         resource: :SomeModule,
         method:   :get
@@ -49,7 +49,7 @@ describe Hollow::Application do
     end
 
     class SomeClass ; end
-    assert_raises(Hollow::ResourceException) do
+    assert_raises(Hollow::Application::ResourceException) do
       @application.handle_request(
         resource: :SomeClass,
         method:   :get
@@ -64,7 +64,7 @@ describe Hollow::Application do
 
     # some_method is defined by TestResource, but is not configured in
     # the application as an available Resource method
-    assert_raises(Hollow::ResourceMethodException) do
+    assert_raises(Hollow::Application::ResourceMethodException) do
       @application.handle_request(
         resource: :TestResource,
         method:   :some_method
@@ -89,7 +89,7 @@ describe Hollow::Application do
   end
 
   it 'Will not invoke undefiend methods' do
-    assert_raises(Hollow::ResourceMethodException) do
+    assert_raises(Hollow::Application::ResourceMethodException) do
       @application.handle_request(
         resource: :TestResource,
         method:   :garbanzo_beans
@@ -125,5 +125,28 @@ describe Hollow::Application do
       resource: :BResource,
       method:   :get
     )
+  end
+
+  it 'Raises informative exceptions' do
+    exception = assert_raises(Hollow::Application::ResourceException) do
+      @application.handle_request(
+        resource: :NotAResource,
+        method:   :not_a_method
+      )
+    end
+    assert_includes(exception.message, "NotAResource")
+    assert_equal(exception.resource_name, :NotAResource)
+
+    exception = assert_raises(Hollow::Application::ResourceMethodException) do
+      @application.handle_request(
+        resource: :TestResource,
+        method:   :not_a_method
+      )
+    end
+
+    assert_includes(exception.message, "TestResource")
+    assert_includes(exception.message, "not_a_method")
+    assert_equal(exception.resource_name, :TestResource)
+    assert_equal(exception.method_name, :not_a_method)
   end
 end
