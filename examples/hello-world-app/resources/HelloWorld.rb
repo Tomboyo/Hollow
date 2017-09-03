@@ -1,17 +1,17 @@
-# Hollow will automatically forward requests like GET /HelloWorld to this class.
+require 'hollow'
+
 class HelloWorld
   include Hollow::Resource::Stateless
 
-  def get(request)
-    "Hello World!"
+  def get(data = {})
+    "Hello, world!"
   end
 
-  def post(request)
-    if (request['name'] && !request['name'].empty?)
-      "Hello, #{request['name']}!"
-    else
-      "Hello, whoever you are!"
-    end
+  def put(data = {})
+    "Hello, #{data["name"]}!"
   end
 
+  def post(data = {})
+    "#{data["greeting"]}, world!"
+  end
 end
