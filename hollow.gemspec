@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
     Hollow is a drop-in component for building RESTful services that bridges
     from any routing solution (like Sinatra) to your back-end. You flesh out
     your service with Resource classes, you pick a Router to forward some
-    traffic to Hollow, and it works. GET /HelloWorld becomes HelloWorld.get().
+    traffic to Hollow, and it works. GET /HelloWorld becomes HelloWorld#get().
   }
   spec.homepage      = "https://www.github.com/tomboyo/hollow"
   spec.license       = "MIT"

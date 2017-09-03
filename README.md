@@ -1,6 +1,6 @@
 # Hollow
 
-> Hollow is a drop-in component for building RESTful services that bridges from any routing solution (like Sinatra) to your back-end. You flesh out your service with Resource classes, you pick a Router to forward some traffic to Hollow, and it works. GET /HelloWorld becomes HelloWorld.get().
+> Hollow is a drop-in component for building RESTful services that bridges from any routing solution (like Sinatra) to your back-end. You flesh out your service with Resource classes, you pick a Router to forward some traffic to Hollow, and it works. GET /HelloWorld becomes HelloWorld#get().
 
 With Hollow, any class which includes `Hollow::Resource::Stateless` or `Stateful` is a REST resource capable of servicing certain kinds of requests. Let's say we want to respond to POST requests with a greeting like, "Hello, Tomboyo!":
 
@@ -54,4 +54,4 @@ Only classes, and only classes which include `Hollow::Resource::Stateless` or `H
 
 # Is this only for REST?
 
-Hollow was designed for REST, but it's not limited in that respect. `Application` can be configured with nonstandard request methods (making resource.myRequestMethodHere a legal request handler), so really `Application` is a mapping from binary identifiers (HelloWorld, post) to methods (HelloWorld post(resource)).
+Hollow was designed for REST, but it's not limited in that respect. `Application` can be configured with nonstandard request methods (making resource.myRequestMethodHere a legal request handler), so really `Application` is a mapping from binary identifiers (HelloWorld, post) to methods (HelloWorld#post(resource)).
