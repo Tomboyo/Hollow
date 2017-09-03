@@ -31,14 +31,22 @@ my_app = Hollow::Application.new(
 The application instance is configured to look for resources in `./resources`, which is where `HelloWorld` is defined. We've also decided that we only want to handle POST requests for now. Finally, we simply pipe HTTP traffic to the application’s `handle_request` method. Using Sinatra:
 
 ```ruby
-get '/:resource' do |resource|
-  my_app.handle_request(
-    resource: resource,
-    method:   request.request_method,
-    data:     request.params
-)
+post '/:resource' do |resource|
+  begin
+    my_app.handle_request(
+      resource: resource,
+      method:   request.request_method,
+      data:     request.params
+    )
+  rescue Hollow::HollowException => e
+    puts "Usage: POST /HelloWorld?name=your_name"
+    puts e.message
+  rescue
+    puts "503!"
+  end
+end
 ```
-Start the server and `curl 127.0.0.1:4567/HelloWorld -d "name=Tomboyo"` to be given an enthusiastic greeting (that is, send a post request with your name). If we want to create any more functionality, we just create new classes where Hollow can find them. That's it!
+Start the server and `curl "http://localhost:4567/HelloWorld" -X POST -d"name=Tomboyo"` to be given an enthusiastic greeting (that is, send a post request with your name). If we want to create any more functionality, we just create new classes where Hollow can find them. That's it!
 
 # What about other classes and methods?
 
