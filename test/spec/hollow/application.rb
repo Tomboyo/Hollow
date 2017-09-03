@@ -4,7 +4,7 @@ require_relative '../../../lib/hollow'
 describe Hollow::Application do
 
   class TestResource
-    include Hollow::Resource::Stateless
+    extend Hollow::Resource::Stateless
 
     def get(request) ; request ; end
     def post(request) ; request ; end
@@ -78,7 +78,7 @@ describe Hollow::Application do
     })
 
     class FooResource
-      include Hollow::Resource::Stateless
+      extend Hollow::Resource::Stateless
       def foo(request) ; :bar ; end
     end
 

@@ -103,7 +103,7 @@ module Hollow
     def handle_request(resource: nil, method: nil, data: {})
       begin
         resource_class = Application::get_resource(resource.to_sym)
-        handler = resource_class.get_instance
+        handler = resource_class.instance
         method = method.to_sym.downcase
       rescue NoMethodError, NameError
         fail ResourceException.new resource
