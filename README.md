@@ -39,7 +39,6 @@ post '/:resource' do |resource|
       data:     request.params
     )
   rescue Hollow::HollowException => e
-    puts "Usage: POST /HelloWorld?name=your_name"
     puts e.message
   rescue
     puts "503!"
