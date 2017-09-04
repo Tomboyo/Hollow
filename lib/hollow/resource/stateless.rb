@@ -19,9 +19,7 @@ module Hollow
           base.extend(Hollow::Resource)
         end
 
-        unless base.is_a?(Singleton)
-          base.include(Singleton)
-        end
+        base.include Singleton
       end
 
       def self.included(base)
