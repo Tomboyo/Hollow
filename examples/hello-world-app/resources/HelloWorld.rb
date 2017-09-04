@@ -1,7 +1,7 @@
 require 'hollow'
 
 class HelloWorld
-  include Hollow::Resource::Stateless
+  extend Hollow::Resource::Stateless
 
   def get(data = {})
     "Hello, world!"

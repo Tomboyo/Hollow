@@ -1,5 +1,5 @@
 class BResource
-  include Hollow::Resource::Stateless
+  extend Hollow::Resource::Stateless
 
   def get(*args)
     "B"

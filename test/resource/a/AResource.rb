@@ -1,5 +1,5 @@
 class AResource
-  include Hollow::Resource::Stateless
+  extend Hollow::Resource::Stateless
 
   def get(*args)
     "A"

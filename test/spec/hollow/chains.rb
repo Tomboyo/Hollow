@@ -10,7 +10,7 @@ describe Hollow::Application do
   it 'Invokes before-chain methods in order before Resource methods' do
 
     class BeforeChain
-      include Hollow::Resource::Stateless
+      extend Hollow::Resource::Stateless
       extend Hollow::Resource::Chains
 
       chain :before, :all, -> (request) { request[:test] << 1 }
@@ -34,7 +34,7 @@ describe Hollow::Application do
 
   it 'Invokes after-chain methods in order after Resource methods' do
     class AfterChain
-      include Hollow::Resource::Stateless
+      extend Hollow::Resource::Stateless
       extend Hollow::Resource::Chains
 
       chain :after, :all, -> (request) { request[:test] << 2 }
