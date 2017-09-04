@@ -30,3 +30,15 @@ describe Hollow::Resource::Stateful do
     assert StatefulResource.kind_of? Hollow::Resource
   end
 end
+
+describe Hollow::Resource do
+  class Resource
+    extend Hollow::Resource
+  end
+
+  it 'Defines include, which must be overwritten' do
+    assert_raises(StandardError) do
+      Resource::instance
+    end
+  end
+end
