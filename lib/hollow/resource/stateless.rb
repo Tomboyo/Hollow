@@ -3,14 +3,13 @@ require 'singleton'
 module Hollow
   module Resource
 
-    # (see Hollow::Resource)
+    # A Resource which keeps no state between requests.
     #
     # Any resource which is thread-safe and does not store information between
-    # requests should prefer Stateless to {Hollow::Resource::Stateful}.
-    # Stateless automatically includes {Singleton} to the targeted class;
-    # the singleton instance handles all requests from {Hollow::Application}.
-    # Note that as a consequence of including Singleton, `instance()` is defined
-    # on the marked class.
+    # requests should prefer Stateless to {Stateful}.
+    #
+    # Stateless automatically includes Singleton to the targeted class.
+    # Singleton::instance supplies the implementation for {Resource}::instance.
     #
     # @see Hollow::Resource::Stateful
     module Stateless

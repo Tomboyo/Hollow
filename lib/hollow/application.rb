@@ -8,14 +8,15 @@ module Hollow
   #
   # - Resource classes compose the service provider aspect of Hollow and
   # encapsulate all or part of a system's business logic.
-  # - Any class can be registered as a resource by including one of the
-  # Stateless[Resource/Stateless] or Stateful[Resource/Stateful] modules.
-  # - The service provider API is defined dynamically by application instance
-  # configuration (see settings[Application#settings-instance_method]).
-  # Different application instances can use the same underlying resources, but
-  # they will filter access to those resources differently. Requests through one
-  # application instance may succeed while requests through another may raise
-  # access exceptions.
+  # - Any class can be registered as a resource by extending one of the
+  # {Resource::Stateless} or {Resource::Stateful} modules.
+  # - The service provider API is defined both dynamically by application
+  # instance configuration (see settings[Application#settings-instance_method]),
+  # and by the {Resource} module. Different application instances can use the
+  # same underlying resources, but they will filter access to those resources
+  # differently depending on instance configuration. Consequently, requests
+  # through one application instance may succeed while requests through another
+  # may raise access exceptions.
   # - Application instances provide service access to resources via the
   # handle_request[#handle_request] method.
   class Application
@@ -69,7 +70,8 @@ module Hollow
     #   defaults.
     # @option settings [Array<Symbol>, Array<String>] :resource_methods
     #   Resource method names which may be invoked on resource instances by
-    #   this application. This effectively defines the service provider API.
+    #   this application. This defines most of the service provider API (the
+    #   remainder is defined by {Resource}).
     # @option settings [String] :autorequire[:root]
     #   location in the file system relative to which other filesystem locations
     #   are evaluated.
