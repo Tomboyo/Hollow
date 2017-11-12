@@ -53,4 +53,4 @@ Only classes, and only classes which include `Hollow::Resource::Stateless` or `H
 
 # Is this only for REST?
 
-Hollow was designed for REST, but it's not limited in that respect. `Application` can be configured with nonstandard request methods (making resource.myRequestMethodHere a legal request handler), so really `Application` is a mapping from binary identifiers (HelloWorld, post) to methods (HelloWorld#post(resource)).
+Hollow was designed for REST, but it's not limited in that respect. `Application` can be configured with nonstandard request methods (making resource.myRequestMethodHere a legal request handler), so really `Application` is a mapping from binary identifiers (HelloWorld, post) to methods (HelloWorld#post(data)).
